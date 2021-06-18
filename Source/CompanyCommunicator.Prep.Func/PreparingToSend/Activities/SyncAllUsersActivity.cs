@@ -156,6 +156,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
                     PartitionKey = UserDataTableNames.UserDataPartition,
                     RowKey = user.Id,
                     AadId = user.Id,
+                    Name = user.DisplayName,
+                    Email = user.UserPrincipalName,
                 });
         }
     }

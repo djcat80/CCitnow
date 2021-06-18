@@ -253,6 +253,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
                 ConversationId = recipient.ConversationId,
                 ServiceUrl = recipient.ServiceUrl,
                 TenantId = recipient.TenantId,
+                Email = recipient.RecipientMail,
+                Name = recipient.RecipientName,
             };
 
             await this.userDataRepository.InsertOrMergeAsync(user);

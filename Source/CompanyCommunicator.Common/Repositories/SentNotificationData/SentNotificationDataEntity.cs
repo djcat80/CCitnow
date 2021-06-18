@@ -94,6 +94,18 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotif
         public string RecipientId { get; set; }
 
         /// <summary>
+        /// Gets or sets a value indicating the name of recipient the notification was sent to
+        /// using the recipient type strings at the top of this class.
+        /// </summary>
+        public string RecipientName { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating the email of recipient the notification was sent to
+        /// using the recipient type strings at the top of this class.
+        /// </summary>
+        public string RecipientMail { get; set; }
+
+        /// <summary>
         /// Gets or sets the total number of throttle responses the bot received when trying
         /// to send the notification to this recipient.
         /// Note: This does not include throttle responses received when creating the conversation.

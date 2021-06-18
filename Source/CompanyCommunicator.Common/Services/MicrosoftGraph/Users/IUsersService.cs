@@ -22,6 +22,13 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGrap
         Task<IEnumerable<User>> GetBatchByUserIds(IEnumerable<IEnumerable<string>> userIdsByGroups);
 
         /// <summary>
+        /// get the list of users by group of usermails.
+        /// </summary>
+        /// <param name="userMails">list of user mails.</param>
+        /// <returns>list of users.</returns>
+        Task<IEnumerable<User>> GetBatchByUserMails(IEnumerable<string> userMails);
+
+        /// <summary>
         /// get the stream of users.
         /// </summary>
         /// <param name="filter">the filter condition.</param>
@@ -50,5 +57,12 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGrap
         /// <param name="userId">User's AAD id.</param>
         /// <returns>true if the user has teams license, false otherwise.</returns>
         Task<bool> HasTeamsLicenseAsync(string userId);
+
+        /// <summary>
+        /// Get the list of users from a list.
+        /// </summary>
+        /// <param name="listUsers">User's mail list.</param>
+        /// <returns>LList of users.</returns>
+        Task<IEnumerable<User>> GetListUsersAsync(List<string> listUsers);
     }
 }

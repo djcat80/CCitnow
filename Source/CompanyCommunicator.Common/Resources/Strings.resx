@@ -247,4 +247,7 @@
   <data name="Throttled" xml:space="preserve">
     <value>Throttled</value>
   </data>
+  <data name="FailedToGetMembersForListFormat" xml:space="preserve">
+    <value>Failed to get members for list of users: {0}</value>
+  </data>
 </root>

@@ -57,6 +57,16 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
         public string ButtonLink { get; set; }
 
         /// <summary>
+        /// Gets or sets the button title of the notification's content.
+        /// </summary>
+        public string ButtonTitle2 { get; set; }
+
+        /// <summary>
+        /// Gets or sets the button link of the notification's content.
+        /// </summary>
+        public string ButtonLink2 { get; set; }
+
+        /// <summary>
         /// Gets or sets the information for the user that created the notification.
         /// </summary>
         public string CreatedBy { get; set; }
@@ -75,21 +85,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
         /// Gets or sets a value indicating whether the notification is a draft.
         /// </summary>
         public bool IsDraft { get; set; }
-
-        /// <summary>
-        /// Gets or sets a value indicating whether the notification is scheduled.
-        /// </summary>
-        public bool IsScheduled { get; set; }
-
-        /// <summary>
-        /// Gets or sets a value indicating whether the notification is important.
-        /// </summary>
-        public bool IsImportant { get; set; }
-
-        /// <summary>
-        /// Gets or sets a value with the JSON describing the buttons for the adaptive card.
-        /// </summary>
-        public string Buttons { get; set; }
 
         /// <summary>
         /// Gets or sets the TeamsInString value.
@@ -154,6 +149,44 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
         public bool AllUsers { get; set; }
 
         /// <summary>
+        /// Gets or sets the GroupsInsString value.
+        /// This property helps to save the Grousp list in the Azure Table storage.
+        /// Table storage doesn't support an array type of the property directly
+        /// so this is a comma separated list of the group ids for which the members
+        /// are the recipients.
+        /// </summary>
+        public string ListUsersInString { get; set; }
+
+        /// <summary>
+        /// Gets or sets the team ids of the Groups audience collection.
+        /// </summary>
+        [IgnoreProperty]
+        public IEnumerable<string> ListUsers
+        {
+            get => JsonConvert.DeserializeObject<IEnumerable<string>>(this.ListUsersInString.IsNullOrEmpty() ? "[]" : this.ListUsersInString);
+            set => this.ListUsersInString = JsonConvert.SerializeObject(value);
+        }
+
+        /// <summary>
+        /// Gets or sets the GroupsInsString value.
+        /// This property helps to save the Grousp list in the Azure Table storage.
+        /// Table storage doesn't support an array type of the property directly
+        /// so this is a comma separated list of the group ids for which the members
+        /// are the recipients.
+        /// </summary>
+        public string CsvUsersInString { get; set; }
+
+        /// <summary>
+        /// Gets or sets the team ids of the Groups audience collection.
+        /// </summary>
+        [IgnoreProperty]
+        public IEnumerable<string> CsvUsers
+        {
+            get => JsonConvert.DeserializeObject<IEnumerable<string>>(this.CsvUsersInString.IsNullOrEmpty() ? "[]" : this.CsvUsersInString);
+            set => this.CsvUsersInString = JsonConvert.SerializeObject(value);
+        }
+
+        /// <summary>
         /// Gets or sets the message version number.
         /// </summary>
         public string MessageVersion { get; set; }
@@ -198,11 +231,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
         /// Gets or sets the DateTime the notification's was queued to be sent.
         /// </summary>
         public DateTime? SendingStartedDate { get; set; }
-
-        /// <summary>
-        /// Gets or sets the DateTime the notification's was scheduled to be sent.
-        /// </summary>
-        public DateTime? ScheduledDate { get; set; }
 
         /// <summary>
         /// Gets or sets the error message for the notification if there was a failure in

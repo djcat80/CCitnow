@@ -193,6 +193,9 @@
   <data name="FailedToGetMembersForGroupFormat" xml:space="preserve">
     <value>No se pudieron obtener los miembros del grupo {0}: {1}</value>
   </data>
+  <data name="FailedToGetMembersForListFormat" xml:space="preserve">
+    <value>No se pudieron obtener los miembros de la lista de usuarios: {0}</value>
+  </data>
   <data name="FailedToGetMembersForTeamFormat" xml:space="preserve">
     <value>No se pudieron obtener los miembros del equipo {0}: {1}</value>
   </data>

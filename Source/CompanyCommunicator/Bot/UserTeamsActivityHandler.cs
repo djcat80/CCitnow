@@ -12,6 +12,12 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
     using Microsoft.Bot.Builder.Teams;
     using Microsoft.Bot.Schema;
     using Microsoft.Bot.Schema.Teams;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.ReceivedNotificationData;
+    using Newtonsoft.Json;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
+    using AdaptiveCards;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGraph;
+    using System.Collections.Generic;
 
     /// <summary>
     /// Company Communicator User Bot.
@@ -22,14 +28,121 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
         private static readonly string TeamRenamedEventType = "teamRenamed";
 
         private readonly TeamsDataCapture teamsDataCapture;
+        private readonly IReceivedNotificationDataRepository dataRep;
+        private readonly ISendingNotificationDataRepository notificationRepo;
+        private readonly IUsersService usersService;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="UserTeamsActivityHandler"/> class.
         /// </summary>
         /// <param name="teamsDataCapture">Teams data capture service.</param>
-        public UserTeamsActivityHandler(TeamsDataCapture teamsDataCapture)
+        /// <param name="dataRep">ReceivedNotificationDataEntity.</param>
+        /// <param name="notificationRepo">Notifications repository</param>
+        /// <param name="usersService">Adaptive card creator</param>
+        public UserTeamsActivityHandler(TeamsDataCapture teamsDataCapture, IReceivedNotificationDataRepository dataRep, ISendingNotificationDataRepository notificationRepo, IUsersService usersService)
         {
             this.teamsDataCapture = teamsDataCapture ?? throw new ArgumentNullException(nameof(teamsDataCapture));
+            this.dataRep = dataRep ?? throw new ArgumentNullException(nameof(dataRep));
+            this.notificationRepo = notificationRepo ?? throw new ArgumentNullException(nameof(notificationRepo));
+            this.usersService = usersService ?? throw new ArgumentNullException(nameof(usersService));
+        }
+
+        /// <inheritdoc/>
+        protected override async Task<MessagingExtensionActionResponse> OnTeamsMessagingExtensionSubmitActionAsync(ITurnContext<IInvokeActivity> turnContext, MessagingExtensionAction action, CancellationToken cancellationToken)
+        {
+            return await base.OnTeamsMessagingExtensionSubmitActionAsync(turnContext, action, cancellationToken);
+        }
+
+        /// <inheritdoc/>
+        protected override async Task<InvokeResponse> OnInvokeActivityAsync(ITurnContext<IInvokeActivity> turnContext, CancellationToken cancellationToken)
+        {
+            return await base.OnInvokeActivityAsync(turnContext, cancellationToken);
+        }
+
+        /// <inheritdoc/>
+        protected override async Task OnMessageActivityAsync(ITurnContext<IMessageActivity> turnContext, CancellationToken cancellationToken)
+        {
+            DataJSON datajson = System.Text.Json.JsonSerializer.Deserialize<DataJSON>(turnContext.Activity.Value.ToString());
+            await this.dataRep.EnsureReceivedNotificationDataTableExistsAsync();
+            Graph.User user = await this.usersService.GetUserAsync(turnContext.Activity.From.AadObjectId);
+            ReceivedNotificationDataEntity notification = new ReceivedNotificationDataEntity
+            {
+                RecipientId = turnContext.Activity.From.AadObjectId,
+                RecipientName = user.DisplayName,
+                RecipientMail = user.UserPrincipalName,
+                Timestamp = turnContext.Activity.Timestamp.Value,
+                ConversationId = datajson.notificationID,
+                PartitionKey = datajson.notificationID,
+                RowKey = turnContext.Activity.Id,
+                ClickedUrl = datajson.url,
+                ButtonId = datajson.buttonID,
+            };
+            await this.dataRep.InsertOrMergeAsync(notification);
+
+            var notificationRep = await this.notificationRepo.GetAsync(
+                NotificationDataTableNames.SendingNotificationsPartition,
+                datajson.notificationID);
+
+            /*
+            var adaptiveCardAttachment = new Attachment()
+            {
+                ContentType = "application/vnd.microsoft.card.adaptive",
+                Content = JsonConvert.DeserializeObject(notificationRep.Content),
+            };*/
+
+            AdaptiveCardParseResult result = AdaptiveCard.FromJson(notificationRep.Content);
+            AdaptiveCard card = result.Card;
+
+            card.Actions.RemoveAt(card.Actions.Count - 1);
+            card.Body.Add(new AdaptiveTextBlock()
+            {
+                Text = turnContext.Activity.Locale == "es-ES" ? "Recepción confirmada" : "Reception confirmed",
+                Color = AdaptiveTextColor.Good,
+            });
+
+            if (card.Actions.Count == 1)
+            {
+                var act = card.Actions[0] as AdaptiveOpenUrlAction;
+                act.Url = new Uri(act.Url.ToString().Replace("[_AAID_]", turnContext.Activity.From.AadObjectId), UriKind.RelativeOrAbsolute);
+                card.Actions[0] = act;
+            }
+
+            var adaptiveCardAttachment = new Attachment()
+            {
+                ContentType = AdaptiveCard.ContentType,
+                Content = JsonConvert.DeserializeObject(card.ToJson()),
+            };
+
+            var reply = MessageFactory.Attachment(adaptiveCardAttachment);
+            reply.Id = turnContext.Activity.ReplyToId;
+            try
+            {
+                await turnContext.UpdateActivityAsync(reply, cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                await base.OnMessageActivityAsync(turnContext, cancellationToken);
+            }
+        }
+
+        protected override async Task<InvokeResponse> OnTeamsCardActionInvokeAsync(ITurnContext<IInvokeActivity> turnContext, CancellationToken cancellationToken)
+        {
+            return await base.OnInvokeActivityAsync(turnContext, cancellationToken);
+        }
+
+        protected override Task OnMessageReactionActivityAsync(ITurnContext<IMessageReactionActivity> turnContext, CancellationToken cancellationToken)
+        {
+            return base.OnMessageReactionActivityAsync(turnContext, cancellationToken);
+        }
+
+        protected override Task OnReactionsAddedAsync(IList<MessageReaction> messageReactions, ITurnContext<IMessageReactionActivity> turnContext, CancellationToken cancellationToken)
+        {
+            return base.OnReactionsAddedAsync(messageReactions, turnContext, cancellationToken);
+        }
+
+        protected override Task OnReactionsRemovedAsync(IList<MessageReaction> messageReactions, ITurnContext<IMessageReactionActivity> turnContext, CancellationToken cancellationToken)
+        {
+            return base.OnReactionsRemovedAsync(messageReactions, turnContext, cancellationToken);
         }
 
         /// <summary>
@@ -84,5 +197,12 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
 
             return UserTeamsActivityHandler.TeamRenamedEventType.Equals(channelData.EventType, StringComparison.OrdinalIgnoreCase);
         }
+
+        private class DataJSON
+        {
+            public string url { get; set; }
+            public string buttonID { get; set; }
+            public string notificationID { get; set; }
+        };
     }
 }

@@ -59,7 +59,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
                     return new SendQueueMessageContent()
                     {
                         NotificationId = input.notification.Id,
-                        IsImportant = input.notification.IsImportant,
                         RecipientData = this.ConvertToRecipientData(recipient),
                     };
                 });
@@ -86,6 +85,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
                         ConversationId = recipient.ConversationId,
                         ServiceUrl = recipient.ServiceUrl,
                         TenantId = recipient.TenantId,
+                        Name = recipient.RecipientName,
+                        Email = recipient.RecipientMail,
                     },
                 };
             }

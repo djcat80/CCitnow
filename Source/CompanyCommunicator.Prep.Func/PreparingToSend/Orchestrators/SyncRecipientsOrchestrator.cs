@@ -85,6 +85,26 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
                 return;
             }
 
+            // List of users
+            if (notification.ListUsers.Any())
+            {
+                await context.CallActivityWithRetryAsync(
+                    FunctionNames.SyncListUsersActivity,
+                    FunctionSettings.DefaultRetryOptions,
+                    (notification.Id, notification.ListUsers));
+                return;
+            }
+
+            // Csv of users
+            if (notification.CsvUsers.Any())
+            {
+                await context.CallActivityWithRetryAsync(
+                    FunctionNames.SyncListUsersActivity,
+                    FunctionSettings.DefaultRetryOptions,
+                    (notification.Id, notification.CsvUsers));
+                return;
+            }
+
             // General channel of teams.
             if (notification.Teams.Any())
             {

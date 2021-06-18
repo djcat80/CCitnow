@@ -9,7 +9,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
     using System.Threading.Tasks;
     using Microsoft.Azure.WebJobs;
     using Microsoft.Bot.Builder;
-    using Microsoft.Bot.Builder.Teams;
     using Microsoft.Bot.Schema;
     using Microsoft.Extensions.Localization;
     using Microsoft.Extensions.Logging;
@@ -137,14 +136,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
                 }
 
                 // Send message.
-                var messageActivity = await this.GetMessageActivity(messageContent);
-
-                // If the message is important, we need to notify the user in Teams
-                if (messageContent.IsImportant)
-                {
-                    messageActivity.TeamsNotifyUser();
-                }
-
+                var messageActivity = await this.GetMessageActivity(messageContent, log);
                 var response = await this.messageService.SendMessageAsync(
                     message: messageActivity,
                     serviceUrl: messageContent.GetServiceUrl(),
@@ -230,11 +222,15 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
             }
         }
 
-        private async Task<IMessageActivity> GetMessageActivity(SendQueueMessageContent message)
+        private async Task<IMessageActivity> GetMessageActivity(SendQueueMessageContent message, ILogger log)
         {
             var notification = await this.notificationRepo.GetAsync(
                 NotificationDataTableNames.SendingNotificationsPartition,
                 message.NotificationId);
+
+            log.LogInformation($"Message content: {notification.Content}");
+            notification.Content = notification.Content.Replace("[_AAID_]", message.RecipientData.RecipientId);
+            log.LogInformation($"Message content after replace: {notification.Content}");
 
             var adaptiveCardAttachment = new Attachment()
             {

@@ -86,6 +86,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.Teams
                             ServiceUrl = serviceUrl,
                             AadId = member.AadObjectId,
                             TenantId = tenantId,
+                            Email = member.Email,
+                            Name = member.Name,
                         };
 
                         return userDataEntity;

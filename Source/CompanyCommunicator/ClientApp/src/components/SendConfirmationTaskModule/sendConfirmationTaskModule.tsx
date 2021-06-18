@@ -12,7 +12,7 @@ import './sendConfirmationTaskModule.scss';
 import { getDraftNotification, getConsentSummaries, sendDraftNotification } from '../../apis/messageListApi';
 import {
     getInitAdaptiveCard, setCardTitle, setCardImageLink, setCardSummary,
-    setCardAuthor, setCardBtns
+    setCardAuthor, setCardBtn
 } from '../AdaptiveCard/adaptiveCard';
 import { ImageUtil } from '../../utility/imageutility';
 import { TFunction } from "i18next";
@@ -37,8 +37,8 @@ export interface IMessage {
     author?: string;
     buttonLink?: string;
     buttonTitle?: string;
-    buttons: string;
-    isImportant?: boolean;
+    buttonLink2?: string;
+    buttonTitle2?: string;
 }
 
 export interface SendConfirmationTaskModuleProps extends RouteComponentProps, WithTranslation {
@@ -51,6 +51,8 @@ export interface IStatusState {
     rosterNames: string[];
     groupNames: string[];
     allUsers: boolean;
+    listUsers: string[];
+    csvUsers: string[];
     messageId: number;
 }
 
@@ -58,8 +60,7 @@ class SendConfirmationTaskModule extends React.Component<SendConfirmationTaskMod
     readonly localize: TFunction;
     private initMessage = {
         id: "",
-        title: "",
-        buttons: "[]"
+        title: ""
     };
 
     private card: any;
@@ -76,6 +77,8 @@ class SendConfirmationTaskModule extends React.Component<SendConfirmationTaskMod
             rosterNames: [],
             groupNames: [],
             allUsers: false,
+            listUsers: [],
+            csvUsers: [],
             messageId: 0,
         };
     }
@@ -94,6 +97,8 @@ class SendConfirmationTaskModule extends React.Component<SendConfirmationTaskMod
                         rosterNames: response.data.rosterNames.sort(),
                         groupNames: response.data.groupNames.sort(),
                         allUsers: response.data.allUsers,
+                        listUsers: response.data.listUsers.sort(),
+                        csvUsers: response.data.csvUsers.sort(),
                         messageId: id,
                     }, () => {
                         this.setState({
@@ -103,20 +108,10 @@ class SendConfirmationTaskModule extends React.Component<SendConfirmationTaskMod
                             setCardImageLink(this.card, this.state.message.imageLink);
                             setCardSummary(this.card, this.state.message.summary);
                             setCardAuthor(this.card, this.state.message.author);
-
-                            if (this.state.message.buttonTitle && this.state.message.buttonLink && !this.state.message.buttons) {
-                                    setCardBtns(this.card, [{
-                                        "type": "Action.OpenUrl",
-                                        "title": this.state.message.buttonTitle,
-                                        "url": this.state.message.buttonLink
-                                    }]);
-
-                                    
+                            if ((this.state.message.buttonTitle && this.state.message.buttonLink) || this.state.message.buttonTitle2) {
+                                setCardBtn(this.card, this.state.message.buttonTitle, this.state.message.buttonLink, this.state.message.buttonTitle2, this.state.message.buttonLink2);
                             }
-                            else {
-                                    setCardBtns(this.card, JSON.parse(this.state.message.buttons));
-                            }
-                            
+
                             let adaptiveCard = new AdaptiveCards.AdaptiveCard();
                             adaptiveCard.parse(this.card);
                             let renderedCard = adaptiveCard.render();
@@ -163,8 +158,6 @@ class SendConfirmationTaskModule extends React.Component<SendConfirmationTaskMod
                                     <div className="results">
                                         {this.renderAudienceSelection()}
                                     </div>
-                                    <h3>{this.localize("Important")}</h3>
-                                    <label>{this.renderImportant()}</label>
                                 </Flex>
                             </Flex.Item>
                             <Flex.Item size="size.half">
@@ -208,18 +201,6 @@ class SendConfirmationTaskModule extends React.Component<SendConfirmationTaskMod
         return resultedTeams;
     }
 
-    private renderImportant = () => {
-        if (this.state.message.isImportant) {
-            return (
-                <label>Yes</label>
-            )
-        } else {
-            return (
-                <label>No</label>
-            )
-        }
-    }
-
     private renderAudienceSelection = () => {
         if (this.state.teamNames && this.state.teamNames.length > 0) {
             return (
@@ -244,6 +225,16 @@ class SendConfirmationTaskModule extends React.Component<SendConfirmationTaskMod
                     <div className="noteText">
                         <Text error content={this.localize("SendToAllUsersNote")} />
                     </div>
+                </div>);
+        } else if (this.state.listUsers && this.state.listUsers.length > 0) {
+            return (
+                <div key="listUsers" > {/*<span className="label">{this.localize("ListUsersLabel")}</span>*/}
+                    <List items={this.getItemList(this.state.listUsers)} />
+                </div>);
+        } else if (this.state.csvUsers && this.state.csvUsers.length > 0) {
+            return (
+                <div key="csvUsers" > {/*<span className="label">{this.localize("ListUsersLabel")}</span>*/}
+                    <List items={this.getItemList(this.state.csvUsers)} />
                 </div>);
         } else {
             return (<div></div>);

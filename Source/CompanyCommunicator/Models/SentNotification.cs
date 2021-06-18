@@ -59,6 +59,16 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Models
         public bool AllUsers { get; set; }
 
         /// <summary>
+        /// Gets or sets Groups audience name collection.
+        /// </summary>
+        public IEnumerable<string> ListUsers { get; set; }
+
+        /// <summary>
+        /// Gets or sets Groups audience name collection.
+        /// </summary>
+        public IEnumerable<string> CsvUsers { get; set; }
+
+        /// <summary>
         /// Gets or sets error message.
         /// </summary>
         public string ErrorMessage { get; set; }

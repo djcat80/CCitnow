@@ -5,15 +5,13 @@ import * as React from 'react';
 import { withTranslation, WithTranslation } from "react-i18next";
 import Messages from '../Messages/messages';
 import DraftMessages from '../DraftMessages/draftMessages';
-import ScheduledMessages from '../ScheduledMessages/ScheduledMessages';
 import './tabContainer.scss';
 import * as microsoftTeams from "@microsoft/teams-js";
 import { getBaseUrl } from '../../configVariables';
 import { Accordion, Button, Flex } from '@fluentui/react-northstar';
-import { getDraftMessagesList, getScheduledMessagesList } from '../../actions';
+import { getDraftMessagesList } from '../../actions';
 import { connect } from 'react-redux';
 import { TFunction } from "i18next";
-
 
 interface ITaskInfo {
     title?: string;
@@ -27,7 +25,6 @@ interface ITaskInfo {
 
 export interface ITaskInfoProps extends WithTranslation {
     getDraftMessagesList?: any;
-    getScheduledMessagesList?: any;
 }
 
 export interface ITabContainerState {
@@ -73,17 +70,6 @@ class TabContainer extends React.Component<ITaskInfoProps, ITabContainerState> {
                 },
             },
             {
-                title: this.localize('ScheduledMessagesSectionTitle'),
-                content: {
-                    key: 'scheduled',
-                    content: (
-                        <div className="messages">
-                            <ScheduledMessages></ScheduledMessages>
-                        </div>
-                    ),
-                },
-            },
-            {
                 title: this.localize('SentMessagesSectionTitle'),
                 content: {
                     key: 'draft',
@@ -100,7 +86,7 @@ class TabContainer extends React.Component<ITaskInfoProps, ITabContainerState> {
                 </Flex>
                 <Flex className="messageContainer">
                     <Flex.Item grow={1} >
-                        <Accordion defaultActiveIndex={[0, 1, 2]} panels={panels} />
+                        <Accordion defaultActiveIndex={[0, 1]} panels={panels} />
                     </Flex.Item>
                 </Flex>
             </Flex>
@@ -118,8 +104,6 @@ class TabContainer extends React.Component<ITaskInfoProps, ITabContainerState> {
 
         let submitHandler = (err: any, result: any) => {
             this.props.getDraftMessagesList();
-            this.props.getScheduledMessagesList();
-            
         };
 
         microsoftTeams.tasks.startTask(taskInfo, submitHandler);
@@ -131,4 +115,4 @@ const mapStateToProps = (state: any) => {
 }
 
 const tabContainerWithTranslation = withTranslation()(TabContainer);
-export default connect(mapStateToProps, { getDraftMessagesList, getScheduledMessagesList })(tabContainerWithTranslation);
+export default connect(mapStateToProps, { getDraftMessagesList })(tabContainerWithTranslation);

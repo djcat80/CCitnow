@@ -5,7 +5,6 @@
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Models
 {
-    using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Text;
@@ -49,9 +48,14 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Models
         public bool AllUsers { get; set; }
 
         /// <summary>
-        /// Gets or sets ScheduledDate value.
+        /// Gets or sets Groups audience id collection.
         /// </summary>
-        public DateTime? ScheduledDate { get; set; }
+        public IEnumerable<string> ListUsers { get; set; }
+
+        /// <summary>
+        /// Gets or sets Groups audience id collection.
+        /// </summary>
+        public IEnumerable<string> CsvUsers { get; set; }
 
         /// <summary>
         /// Validates a draft notification.

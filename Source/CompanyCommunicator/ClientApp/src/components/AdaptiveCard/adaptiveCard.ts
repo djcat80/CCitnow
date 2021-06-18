@@ -2,21 +2,6 @@
 // Licensed under the MIT License.
 
 import { TFunction } from "i18next";
-import * as AdaptiveCards from "adaptivecards";
-import MarkdownIt from "markdown-it";
-
-// Static method to render markdown on the adaptive card
-AdaptiveCards.AdaptiveCard.onProcessMarkdown = function (text, result) {
-    var md = new MarkdownIt();
-    // Teams only supports a subset of markdown as per https://docs.microsoft.com/en-us/microsoftteams/platform/task-modules-and-cards/cards/cards-format?tabs=adaptive-md%2Cconnector-html#formatting-cards-with-markdown
-    md.disable(['image', 'table', 'heading',
-        'hr', 'code', 'reference',
-        'lheading', 'html_block', 'fence',
-        'blockquote', 'strikethrough']);
-    // renders the text
-    result.outputHtml = md.render(text);
-    result.didProcess = true;
-}
 
 export const getInitAdaptiveCard = (t: TFunction) => {
     const titleTextAsString = t("TitleText");
@@ -98,12 +83,105 @@ export const getCardBtnLink = (card: any) => {
     return card.actions[0].url;
 }
 
-// set the values collection with buttons to the card actions
-export const setCardBtns = (card: any, values: any[]) => {
-    if (values !== null) {
-            card.actions = values;
+export const getCardBtnTitle2 = (card: any) => {
+    return card.actions[1].title;
+}
+
+export const getCardBtnLink2 = (card: any) => {
+    return card.actions[1].url;
+}
+
+export const setCardBtn = (card: any, buttonTitle?: string, buttonLink?: string, buttonTitle2?: string, buttonLink2?: string) => {
+    if (buttonTitle && buttonLink && buttonTitle2 /*&& buttonLink2*/) {
+        card.actions = [
+            {
+                "type": "Action.OpenUrl",
+                "title": buttonTitle,
+                "url": buttonLink
+            },
+            {
+                "type": "Action.OpenUrl",
+                "title": buttonTitle2,
+                "url": buttonLink2
+            }
+        ];
+    } 
+    else if (buttonTitle && buttonLink && (!buttonTitle2) /*|| !buttonLink2)*/) {
+        card.actions = [
+            {
+                "type": "Action.OpenUrl",
+                "title": buttonTitle,
+                "url": buttonLink
+            }
+        ];
+    }
+    else if (buttonTitle2 /*&& buttonLink2*/ && (!buttonTitle || !buttonLink)) {
+        card.actions = [
+            {
+                "type": "Action.OpenUrl",
+                "title": buttonTitle2,
+                "url": buttonLink2
+            }
+        ];
     } else {
         delete card.actions;
     }
 }
 
+export const setCardBtn2 = (card: any, buttonTitle?: string, buttonLink?: string, buttonTitle2?: string, buttonLink2?: string) => {
+    if (buttonTitle && buttonLink && buttonTitle2 && buttonLink2) {
+        card.actions = [
+            {
+                "type": "Action.OpenUrl",
+                "title": buttonTitle,
+                "url": buttonLink
+            },
+            {
+                "type": "Action.OpenUrl",
+                "title": buttonTitle2,
+                "url": buttonLink2
+            },
+            {
+                "type": "Action.Submit",
+                "title": "Submit",
+                "data": {
+                    "x": 13
+                  }
+            }
+        ];
+    } 
+    else if (buttonTitle && buttonLink && (!buttonTitle2 || !buttonLink2)) {
+        card.actions = [
+            {
+                "type": "Action.OpenUrl",
+                "title": buttonTitle,
+                "url": buttonLink
+            },
+            {
+                "type": "Action.Submit",
+                "title": "Submit",
+                "data": {
+                    "x": 13
+                  }
+            }
+        ];
+    }
+    else if (buttonTitle2 && buttonLink2 && (!buttonTitle || !buttonLink)) {
+        card.actions = [
+            {
+                "type": "Action.OpenUrl",
+                "title": buttonTitle2,
+                "url": buttonLink2
+            },
+            {
+                "type": "Action.Submit",
+                "title": "Submit",
+                "data": {
+                    "x": 13
+                  }
+            }
+        ];
+    } else {
+        delete card.actions;
+    }
+}

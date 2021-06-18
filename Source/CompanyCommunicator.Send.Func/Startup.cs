@@ -21,6 +21,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.CommonBot;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues.SendQueue;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGraph;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.Teams;
     using Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services;
 
@@ -95,6 +96,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
 
             // Add the Notification service.
             builder.Services.AddTransient<INotificationService, NotificationService>();
+            builder.Services.AddScoped<IUsersService>(sp => sp.GetRequiredService<IGraphServiceFactory>().GetUsersService());
         }
     }
 }

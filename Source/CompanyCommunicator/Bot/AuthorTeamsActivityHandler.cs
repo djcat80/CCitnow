@@ -49,6 +49,27 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
             this.localizer = localizer ?? throw new ArgumentNullException(nameof(localizer));
         }
 
+        protected override async Task<MessagingExtensionActionResponse> OnTeamsMessagingExtensionSubmitActionAsync(ITurnContext<IInvokeActivity> turnContext, MessagingExtensionAction action, CancellationToken cancellationToken)
+        {
+            return await base.OnTeamsMessagingExtensionSubmitActionAsync(turnContext, action, cancellationToken);
+        }
+
+        protected override Task OnMessageActivityAsync(ITurnContext<IMessageActivity> turnContext, CancellationToken cancellationToken)
+        {
+            return base.OnMessageActivityAsync(turnContext, cancellationToken);
+        }
+
+        /// <inheritdoc/>
+        protected override async Task<InvokeResponse> OnInvokeActivityAsync(ITurnContext<IInvokeActivity> turnContext, CancellationToken cancellationToken)
+        {
+            return await base.OnInvokeActivityAsync(turnContext, cancellationToken);
+        }
+
+        protected override async Task<InvokeResponse> OnTeamsCardActionInvokeAsync(ITurnContext<IInvokeActivity> turnContext, CancellationToken cancellationToken)
+        {
+            return await base.OnInvokeActivityAsync(turnContext, cancellationToken);
+        }
+
         /// <summary>
         /// Invoked when a conversation update activity is received from the channel.
         /// </summary>
