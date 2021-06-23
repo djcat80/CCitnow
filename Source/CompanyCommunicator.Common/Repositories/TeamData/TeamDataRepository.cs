@@ -5,11 +5,11 @@
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.TeamData
 {
+    using Microsoft.Extensions.Logging;
+    using Microsoft.Extensions.Options;
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
-    using Microsoft.Extensions.Logging;
-    using Microsoft.Extensions.Options;
 
     /// <summary>
     /// Repository of the team data stored in the table storage.

@@ -98,12 +98,105 @@ export const getCardBtnLink = (card: any) => {
     return card.actions[0].url;
 }
 
-// set the values collection with buttons to the card actions
-export const setCardBtns = (card: any, values: any[]) => {
-    if (values !== null) {
-            card.actions = values;
+export const getCardBtnTitle2 = (card: any) => {
+    return card.actions[1].title;
+}
+
+export const getCardBtnLink2 = (card: any) => {
+    return card.actions[1].url;
+}
+
+export const setCardBtn = (card: any, buttonTitle?: string, buttonLink?: string, buttonTitle2?: string, buttonLink2?: string) => {
+    if (buttonTitle && buttonLink && buttonTitle2 /*&& buttonLink2*/) {
+        card.actions = [
+            {
+                "type": "Action.OpenUrl",
+                "title": buttonTitle,
+                "url": buttonLink
+            },
+            {
+                "type": "Action.OpenUrl",
+                "title": buttonTitle2,
+                "url": buttonLink2
+            }
+        ];
+    }
+    else if (buttonTitle && buttonLink && (!buttonTitle2) /*|| !buttonLink2)*/) {
+        card.actions = [
+            {
+                "type": "Action.OpenUrl",
+                "title": buttonTitle,
+                "url": buttonLink
+            }
+        ];
+    }
+    else if (buttonTitle2 /*&& buttonLink2*/ && (!buttonTitle || !buttonLink)) {
+        card.actions = [
+            {
+                "type": "Action.OpenUrl",
+                "title": buttonTitle2,
+                "url": buttonLink2
+            }
+        ];
     } else {
         delete card.actions;
     }
 }
 
+export const setCardBtn2 = (card: any, buttonTitle?: string, buttonLink?: string, buttonTitle2?: string, buttonLink2?: string) => {
+    if (buttonTitle && buttonLink && buttonTitle2 && buttonLink2) {
+        card.actions = [
+            {
+                "type": "Action.OpenUrl",
+                "title": buttonTitle,
+                "url": buttonLink
+            },
+            {
+                "type": "Action.OpenUrl",
+                "title": buttonTitle2,
+                "url": buttonLink2
+            },
+            {
+                "type": "Action.Submit",
+                "title": "Submit",
+                "data": {
+                    "x": 13
+                }
+            }
+        ];
+    }
+    else if (buttonTitle && buttonLink && (!buttonTitle2 || !buttonLink2)) {
+        card.actions = [
+            {
+                "type": "Action.OpenUrl",
+                "title": buttonTitle,
+                "url": buttonLink
+            },
+            {
+                "type": "Action.Submit",
+                "title": "Submit",
+                "data": {
+                    "x": 13
+                }
+            }
+        ];
+    }
+    else if (buttonTitle2 && buttonLink2 && (!buttonTitle || !buttonLink)) {
+        card.actions = [
+            {
+                "type": "Action.OpenUrl",
+                "title": buttonTitle2,
+                "url": buttonLink2
+            },
+            {
+                "type": "Action.Submit",
+                "title": "Submit",
+                "data": {
+                    "x": 13
+                }
+            }
+        ];
+    } else {
+        delete card.actions;
+    }
+}

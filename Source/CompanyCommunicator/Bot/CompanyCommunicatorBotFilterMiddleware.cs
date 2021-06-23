@@ -5,12 +5,12 @@
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
 {
+    using Microsoft.Bot.Builder;
+    using Microsoft.Extensions.Options;
     using System;
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
-    using Microsoft.Bot.Builder;
-    using Microsoft.Extensions.Options;
 
     /// <summary>
     /// The bot's general filter middleware.

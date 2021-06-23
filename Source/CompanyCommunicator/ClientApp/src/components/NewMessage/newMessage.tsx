@@ -12,10 +12,12 @@ import Resizer from 'react-image-file-resizer';
 import './newMessage.scss';
 import './teamTheme.scss';
 import { getDraftNotification, getTeams, createDraftNotification, updateDraftNotification, searchGroups, getGroups, verifyGroupAccess } from '../../apis/messageListApi';
-import { getInitAdaptiveCard, setCardTitle, setCardImageLink, setCardSummary, setCardAuthor, setCardBtns } from '../AdaptiveCard/adaptiveCard';
+import { getInitAdaptiveCard, setCardTitle, setCardImageLink, setCardSummary, setCardAuthor, setCardBtn } from '../AdaptiveCard/adaptiveCard';
 import { getBaseUrl } from '../../configVariables';
 import { ImageUtil } from '../../utility/imageutility';
 import { TFunction } from "i18next";
+import * as XLSX from 'xlsx';
+import { initializeIcons } from 'office-ui-fabric-react/lib/Icons';
 
 //hours to be chosen when scheduling messages
 const hours = ["00", "01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11",
@@ -47,14 +49,17 @@ export interface IDraftMessage {
     author: string,
     buttonTitle?: string,
     buttonLink?: string,
+    buttonTitle2?: string,
+    buttonLink2?: string,
     teams: any[],
     rosters: any[],
     groups: any[],
+    listUsers: any[],
     allUsers: boolean,
+    csvUsers: any[]
     isImportant: boolean, // indicates if the message is important
     isScheduled: boolean, // indicates if the message is scheduled
     ScheduledDate: Date, // stores the scheduled date
-    Buttons: string // stores tha card buttons (JSON)
 }
 
 export interface formState {
@@ -63,6 +68,8 @@ export interface formState {
     btnLink?: string,
     imageLink?: string,
     btnTitle?: string,
+    btnTitle2?: string,
+    btnLink2?: string,
     author: string,
     card?: any,
     page: string,
@@ -70,6 +77,8 @@ export interface formState {
     rostersOptionSelected: boolean,
     allUsersOptionSelected: boolean,
     groupsOptionSelected: boolean,
+    listUsersOptionSelected: boolean,
+    csvUsersOptionSelected: boolean,
     teams?: any[],
     groups?: any[],
     exists?: boolean,
@@ -86,6 +95,10 @@ export interface formState {
     selectedTeams: dropdownItem[],
     selectedRosters: dropdownItem[],
     selectedGroups: dropdownItem[],
+    selectedListUsers: string[],
+    selectedListUsersStr: string,
+    selectedCsvUsers: string[],
+    selectedCsvUsersStr: string,
     errorImageUrlMessage: string,
     errorButtonUrlMessage: string,
     selectedSchedule: boolean, //status of the scheduler checkbox
@@ -95,7 +108,8 @@ export interface formState {
     DMYHour: string, //hour selected
     DMYMins: string, //mins selected
     futuredate: boolean, //if the date is in the future (valid schedule)
-    values: any[] //button values collection
+    errorButtonUrlMessage2: string,
+    deleteKey: number,
 }
 
 export interface INewMessageProps extends RouteComponentProps, WithTranslation {
@@ -109,6 +123,7 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
 
     constructor(props: INewMessageProps) {
         super(props);
+        initializeIcons();
         this.localize = this.props.t;
         this.card = getInitAdaptiveCard(this.localize);
         this.setDefaultCard(this.card);
@@ -119,13 +134,18 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
             author: "",
             btnLink: "",
             imageLink: "",
+
             btnTitle: "",
+            btnLink2: "",
+            btnTitle2: "",
             card: this.card,
             page: "CardCreation",
             teamsOptionSelected: true,
             rostersOptionSelected: false,
             allUsersOptionSelected: false,
             groupsOptionSelected: false,
+            listUsersOptionSelected: false,
+            csvUsersOptionSelected: false,
             messageId: "",
             loader: true,
             groupAccess: false,
@@ -134,6 +154,10 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
             unstablePinned: true,
             selectedTeamsNum: 0,
             selectedRostersNum: 0,
+            selectedListUsers: [],
+            selectedListUsersStr: "",
+            selectedCsvUsers: [],
+            selectedCsvUsersStr: "",
             selectedGroupsNum: 0,
             selectedRadioBtn: "teams",
             selectedTeams: [],
@@ -141,6 +165,8 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
             selectedGroups: [],
             errorImageUrlMessage: "",
             errorButtonUrlMessage: "",
+            errorButtonUrlMessage2: "",
+            deleteKey: Date.now(),
             selectedSchedule: false, //scheduler option is disabled by default
             selectedImportant: false, //important flag for the msg is false by default
             scheduledDate: TempDate.toUTCString(), //current date in UTC string format
@@ -148,7 +174,6 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
             DMYHour: this.getDateHour(TempDate.toUTCString()), //initialize with the current hour (rounded up)
             DMYMins: this.getDateMins(TempDate.toUTCString()), //initialize with the current minute (rounded up)
             futuredate: false, //by default the date is not in the future
-            values: [] //by default there are no buttons on the adaptive card
         }
         this.fileInput = React.createRef();
         this.handleImageSelection = this.handleImageSelection.bind(this);
@@ -176,8 +201,7 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
                         scheduledDate: this.state.scheduledDate,
                         DMY: this.getDateObject(this.state.scheduledDate),
                         DMYHour: this.getDateHour(this.state.scheduledDate),
-                        DMYMins: this.getDateMins(this.state.scheduledDate),
-                        values: this.state.values
+                        DMYMins: this.getDateMins(this.state.scheduledDate)
                     })
                 });
                 this.getGroupData(id).then(() => {
@@ -284,17 +308,14 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
         const summaryAsString = this.localize("Summary");
         const authorAsString = this.localize("Author1");
         const buttonTitleAsString = this.localize("ButtonTitle");
+        const buttonTitleAsString2 = this.localize("ButtonTitle2");
 
         setCardTitle(card, titleAsString);
         let imgUrl = getBaseUrl() + "/image/imagePlaceholder.png";
         setCardImageLink(card, imgUrl);
         setCardSummary(card, summaryAsString);
         setCardAuthor(card, authorAsString);
-        setCardBtns(card, [{
-            "type": "Action.OpenUrl",
-            "title": "Button",
-            "url": ""
-        }]);
+        setCardBtn(card, buttonTitleAsString, "https://adaptivecards.io", buttonTitleAsString2, "https://adaptivecards.io");
     }
 
     private getTeamList = async () => {
@@ -360,6 +381,12 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
             else if (draftMessageDetail.allUsers) {
                 selectedRadioButton = "allUsers";
             }
+            else if (draftMessageDetail.listUsers) {
+                selectedRadioButton = "listUsers";
+            }
+            else if (draftMessageDetail.csvUsers) {
+                selectedRadioButton = "csvUsers";
+            }
 
             // set state based on values returned 
             this.setState({
@@ -368,11 +395,15 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
                 rostersOptionSelected: draftMessageDetail.rosters.length > 0,
                 selectedRostersNum: draftMessageDetail.rosters.length,
                 groupsOptionSelected: draftMessageDetail.groups.length > 0,
+                listUsersOptionSelected: draftMessageDetail.listUsers.length > 0,
+                csvUsersOptionSelected: draftMessageDetail.csvUsers.length > 0,
                 selectedGroupsNum: draftMessageDetail.groups.length,
                 selectedRadioBtn: selectedRadioButton,
                 selectedTeams: draftMessageDetail.teams,
                 selectedRosters: draftMessageDetail.rosters,
                 selectedGroups: draftMessageDetail.groups,
+                selectedListUsersStr: draftMessageDetail.listUsers.join(';'),
+                selectedListUsers: draftMessageDetail.listUsers,
                 selectedSchedule: draftMessageDetail.isScheduled,
                 selectedImportant: draftMessageDetail.isImportant,
                 scheduledDate: draftMessageDetail.scheduledDate,
@@ -384,39 +415,15 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
             setCardSummary(this.card, draftMessageDetail.summary);
             setCardAuthor(this.card, draftMessageDetail.author);
 
-            // this is to ensure compatibility with older versions
-            // if we get empty buttonsJSON and values on buttonTitle and buttonLink, we insert those to values
-            // if not we just use values cause the JSON will be complete over there
-            if (draftMessageDetail.buttonTitle && draftMessageDetail.buttonLink && !draftMessageDetail.buttons) {
-                this.setState({
-                    values: [{
-                        "type": "Action.OpenUrl",
-                        "title": draftMessageDetail.buttonTitle,
-                        "url": draftMessageDetail.buttonLink
-                    }]
-                });
-             }
-            else {
-                // set the values state with the parse of the JSON recovered from the database
-                if (draftMessageDetail.buttons !== null) { //if the database value is not null, parse the JSON to create the button objects
-                    this.setState({
-                        values: JSON.parse(draftMessageDetail.buttons)
-                    });
-                } else { //if the string is null, then initialize the empty collection 
-                    this.setState({
-                        values: []
-                    });
-                }
-            }
-
-            // set the card buttons collection based on the values collection
-            setCardBtns(this.card, this.state.values);
+            setCardBtn(this.card, draftMessageDetail.buttonTitle, draftMessageDetail.buttonLink, draftMessageDetail.buttonTitle2, draftMessageDetail.buttonLink2);
             this.setState({
                 title: draftMessageDetail.title,
                 summary: draftMessageDetail.summary,
                 btnLink: draftMessageDetail.buttonLink,
                 imageLink: draftMessageDetail.imageLink,
                 btnTitle: draftMessageDetail.buttonTitle,
+                btnTitle2: draftMessageDetail.buttonTitle2,
+                btnLink2: draftMessageDetail.buttonLink2,
                 author: draftMessageDetail.author,
                 allUsersOptionSelected: draftMessageDetail.allUsers,
                 loader: false
@@ -455,28 +462,15 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
                                             autoComplete="off"
                                             fluid
                                         />
-                                        <Flex gap="gap.smaller" vAlign="end" className="inputField">
-                                            <Input
-                                                value={this.state.imageLink}
-                                                label={this.localize("ImageURL")}
-                                                placeholder={this.localize("ImageURLPlaceHolder")}
-                                                onChange={this.onImageLinkChanged}
-                                                error={!(this.state.errorImageUrlMessage === "")}
-                                                autoComplete="off"
-                                                fluid
-                                            />
-                                            <input type="file" accept="image/"
-                                                style={{ display: 'none' }}
-                                                onChange={this.handleImageSelection}
-                                                ref={this.fileInput} />
-                                            <Flex.Item push>
-                                                <Button circular onClick={this.handleUploadClick}
-                                                    size="small"
-                                                    icon={<FilesUploadIcon />}
-                                                    title={this.localize("UploadImage")}
-                                                />
-                                            </Flex.Item>
-                                        </Flex>
+
+                                        <Input fluid className="inputField"
+                                            value={this.state.imageLink}
+                                            label={this.localize("ImageURL")}
+                                            placeholder={this.localize("ImageURL")}
+                                            onChange={this.onImageLinkChanged}
+                                            error={!(this.state.errorImageUrlMessage === "")}
+                                            autoComplete="off"
+                                        />
                                         <Text className={(this.state.errorImageUrlMessage === "") ? "hide" : "show"} error size="small" content={this.state.errorImageUrlMessage} />
 
                                         <div className="textArea">
@@ -497,17 +491,40 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
                                             autoComplete="off"
                                             fluid
                                         />
-                                        <div className="textArea">
-                                            <Flex gap="gap.large" vAlign="end">
-                                                <Text size="small" align="start" content={this.localize("Buttons")} />
-                                                <Flex.Item push >
-                                                    <Button circular size="small" disabled={(this.state.values.length == 4) || !(this.state.errorButtonUrlMessage === "")} icon={ <AddIcon />} title={this.localize("Add")} onClick={this.addClick.bind(this)} />
-                                                </Flex.Item>
-                                            </Flex>
-                                        </div>
-                                        
-                                        {this.createUI()}
-
+                                        <Input className="inputField"
+                                            fluid
+                                            value={this.state.btnTitle}
+                                            label={this.localize("ButtonTitle")}
+                                            placeholder={this.localize("ButtonTitle")}
+                                            onChange={this.onBtnTitleChanged}
+                                            autoComplete="off"
+                                        />
+                                        <Input className="inputField"
+                                            fluid
+                                            value={this.state.btnLink}
+                                            label={this.localize("ButtonURL")}
+                                            placeholder={this.localize("ButtonURL")}
+                                            onChange={this.onBtnLinkChanged}
+                                            error={!(this.state.errorButtonUrlMessage === "")}
+                                            autoComplete="off"
+                                        />
+                                        <Input className="inputField"
+                                            fluid
+                                            value={this.state.btnTitle2}
+                                            label={this.localize("ButtonTitle2")}
+                                            placeholder={this.localize("ButtonTitle2")}
+                                            onChange={this.onBtnTitleChanged2}
+                                            autoComplete="off"
+                                        />
+                                        <Input className="inputField"
+                                            fluid
+                                            value={this.state.btnLink2}
+                                            label={this.localize("ButtonURL2")}
+                                            placeholder={this.localize("ButtonURL2Holder")}
+                                            onChange={this.onBtnLinkChanged2}
+                                            error={!(this.state.errorButtonUrlMessage2 === "")}
+                                            autoComplete="off"
+                                        />
                                         <Text className={(this.state.errorButtonUrlMessage === "") ? "hide" : "show"} error size="small" content={this.state.errorButtonUrlMessage} />
                                     </Flex>
                                 </Flex.Item>
@@ -643,19 +660,73 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
                                                             </Flex>
                                                         )
                                                     },
+                                                },
+                                                {
+                                                    name: "listUsers",
+                                                    key: "listUsers",
+                                                    value: "listUsers",
+                                                    label: this.localize("SendToList"),
+                                                    children: (Component, { name, ...props }) => {
+                                                        return (
+                                                            <Flex key={name} column>
+                                                                <Component {...props} />
+                                                                <TextArea
+                                                                    autoFocus
+                                                                    rows={5}
+                                                                    placeholder={this.localize("SendToListPlaceholder")}
+                                                                    hidden={!this.state.listUsersOptionSelected}
+                                                                    defaultValue={this.state.selectedListUsersStr}
+                                                                    onChange={this.onListUsersChange}
+                                                                    fluid />
+                                                                <div className={this.state.listUsersOptionSelected ? "" : "hide"}>
+                                                                    <div className="noteText">
+                                                                        <Text error content={this.localize("SendToAllUsersNote")} />
+                                                                    </div>
+                                                                </div>
+                                                            </Flex>
+                                                        )
+                                                    },
+                                                },
+                                                {
+                                                    name: "csvUsers",
+                                                    key: "csvUsers",
+                                                    value: "csvUsers",
+                                                    label: this.localize("SendToCsv"),
+                                                    children: (Component, { name, ...props }) => {
+                                                        return (
+                                                            <Flex key={name} column>
+                                                                <Component {...props} />
+                                                                <input
+                                                                    type="file"
+                                                                    accept=".csv,.xlsx,.xls"
+                                                                    onChange={this.handleFileUpload}
+                                                                    title="sube"
+                                                                    hidden={!this.state.csvUsersOptionSelected}
+                                                                    key={this.state.deleteKey}
+                                                                />
+                                                                <div className={this.state.csvUsersOptionSelected ? "" : "hide"}>
+                                                                    <div className="noteText">
+                                                                        <Text error content={this.localize("SendToAllUsersNote")} />
+                                                                    </div>
+                                                                </div>
+                                                            </Flex>
+                                                        )
+                                                    },
                                                 }
                                             ]}
                                         >
+
                                         </RadioGroup>
 
+
                                         <Flex hAlign="start">
-                                         <h3><Checkbox
-                                            className="ScheduleCheckbox"
-                                            labelPosition="start"
-                                            onClick={this.onScheduleSelected}
-                                            label={this.localize("ScheduledSend")}
-                                            checked={this.state.selectedSchedule}
-                                            toggle
+                                            <h3><Checkbox
+                                                className="ScheduleCheckbox"
+                                                labelPosition="start"
+                                                onClick={this.onScheduleSelected}
+                                                label={this.localize("ScheduledSend")}
+                                                checked={this.state.selectedSchedule}
+                                                toggle
                                             /></h3>
                                         </Flex>
                                         <Text size="small" align="start" content={this.localize('ScheduledSendDescription')} />
@@ -693,16 +764,6 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
                                                 <Text error content={this.localize('FutureDateError')} />
                                             </div>
                                         </div>
-                                        <Flex hAlign="start">
-                                            <h3><Checkbox
-                                                className="Important"
-                                                labelPosition="start"
-                                                onClick={this.onImportantSelected}
-                                                label={this.localize("Important")}
-                                                checked={this.state.selectedImportant}
-                                                toggle
-                                            /></h3>
-                                        </Flex>
                                         <Text size="small" align="start" content={this.localize('ImportantDescription')} />
                                     </Flex>
                                 </Flex.Item>
@@ -830,6 +891,8 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
             teamsOptionSelected: data.value === 'teams',
             rostersOptionSelected: data.value === 'rosters',
             groupsOptionSelected: data.value === 'groups',
+            listUsersOptionSelected: data.value === 'listUsers',
+            csvUsersOptionSelected: data.value === 'csvUsers',
             allUsersOptionSelected: data.value === 'allUsers',
             selectedTeams: data.value === 'teams' ? this.state.selectedTeams : [],
             selectedTeamsNum: data.value === 'teams' ? this.state.selectedTeamsNum : 0,
@@ -837,6 +900,8 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
             selectedRostersNum: data.value === 'rosters' ? this.state.selectedRostersNum : 0,
             selectedGroups: data.value === 'groups' ? this.state.selectedGroups : [],
             selectedGroupsNum: data.value === 'groups' ? this.state.selectedGroupsNum : 0,
+            selectedListUsers: data.value === 'listUsers' ? this.state.selectedListUsers : [],
+            //selectedCsvUsers: data.value === 'csvUsers' ? this.state.selectedCsvUsers : []
         });
     }
 
@@ -844,13 +909,17 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
         const teamsSelectionIsValid = (this.state.teamsOptionSelected && (this.state.selectedTeamsNum !== 0)) || (!this.state.teamsOptionSelected);
         const rostersSelectionIsValid = (this.state.rostersOptionSelected && (this.state.selectedRostersNum !== 0)) || (!this.state.rostersOptionSelected);
         const groupsSelectionIsValid = (this.state.groupsOptionSelected && (this.state.selectedGroupsNum !== 0)) || (!this.state.groupsOptionSelected);
-        const nothingSelected = (!this.state.teamsOptionSelected) && (!this.state.rostersOptionSelected) && (!this.state.groupsOptionSelected) && (!this.state.allUsersOptionSelected);
-        return (!teamsSelectionIsValid || !rostersSelectionIsValid || !groupsSelectionIsValid || nothingSelected)
+        const listUsersSelectionIsValid = (this.state.listUsersOptionSelected && (this.state.selectedListUsersStr != "")) || (!this.state.listUsersOptionSelected);
+        const csvtUsersSelectionIsValid = (this.state.csvUsersOptionSelected && (this.state.selectedCsvUsersStr != "")) || (!this.state.csvUsersOptionSelected);
+        const nothingSelected = (!this.state.teamsOptionSelected) && (!this.state.rostersOptionSelected) && (!this.state.groupsOptionSelected) && (!this.state.listUsersOptionSelected) && (!this.state.allUsersOptionSelected) && (!this.state.csvUsersOptionSelected);
+        return (!teamsSelectionIsValid || !rostersSelectionIsValid || !groupsSelectionIsValid || !listUsersSelectionIsValid || !csvtUsersSelectionIsValid || nothingSelected)
     }
 
     private isNextBtnDisabled = () => {
         const title = this.state.title;
-        return !(title && (this.state.errorButtonUrlMessage === ""));
+        const btnTitle = this.state.btnTitle;
+        const btnLink = this.state.btnLink;
+        return !(title && ((btnTitle && btnLink) || (!btnTitle && !btnLink)) && (this.state.errorImageUrlMessage === "") && (this.state.errorButtonUrlMessage === "") && (this.state.errorButtonUrlMessage2 === ""));
     }
 
     private getItems = () => {
@@ -889,8 +958,12 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
             selectedTeamsNum: itemsData.value.length,
             selectedRosters: [],
             selectedRostersNum: 0,
-            selectedGroups: [],
-            selectedGroupsNum: 0
+            selectedGroups: [], selectedGroupsNum: 0,
+            selectedListUsers: [],
+            selectedListUsersStr: "",
+            selectedCsvUsers: [],
+            selectedCsvUsersStr: "",
+            deleteKey: Date.now()
         })
     }
 
@@ -902,8 +975,53 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
             selectedTeams: [],
             selectedTeamsNum: 0,
             selectedGroups: [],
-            selectedGroupsNum: 0
+            selectedGroupsNum: 0,
+            selectedListUsers: [],
+            selectedListUsersStr: "",
+            selectedCsvUsers: [],
+            selectedCsvUsersStr: "",
+            deleteKey: Date.now()
         })
+    }
+
+    private onListUsersChange = (event: any, itemsData: any) => {
+        this.setState({
+            selectedGroups: [],
+            selectedGroupsNum: 0,
+            groups: [],
+            selectedTeams: [],
+            selectedTeamsNum: 0,
+            selectedRosters: [],
+            selectedRostersNum: 0,
+            selectedListUsersStr: itemsData.value,
+            selectedListUsers: itemsData.value == "" ? [] : itemsData.value.split(';').filter(function (el: string) { return el != "" }),
+            selectedCsvUsers: [],
+            selectedCsvUsersStr: "",
+            deleteKey: Date.now()
+        })
+    }
+
+    private handleFileUpload = (e: any) => {
+        const file = e.target.files[0];
+        const reader = new FileReader();
+        reader.onload = (evt) => {
+            if (reader.result) {
+                this.setState({
+                    selectedGroups: [],
+                    selectedGroupsNum: 0,
+                    groups: [],
+                    selectedTeams: [],
+                    selectedTeamsNum: 0,
+                    selectedRosters: [],
+                    selectedRostersNum: 0,
+                    selectedListUsersStr: "",
+                    selectedListUsers: [],
+                    selectedCsvUsersStr: reader.result.toString(),
+                    selectedCsvUsers: reader.result == "" ? [] : reader.result.toString().split(';').filter(function (el: string) { return el != "" })
+                })
+            }
+        };
+        reader.readAsText(file);
     }
 
     private onGroupsChange = (event: any, itemsData: any) => {
@@ -990,6 +1108,7 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
         const selectedTeams: string[] = [];
         const selctedRosters: string[] = [];
         const selectedGroups: string[] = [];
+        const selectedListUsers: string[] = [];
         this.state.selectedTeams.forEach(x => selectedTeams.push(x.team.id));
         this.state.selectedRosters.forEach(x => selctedRosters.push(x.team.id));
         this.state.selectedGroups.forEach(x => selectedGroups.push(x.team.id));
@@ -1002,14 +1121,17 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
             author: this.state.author,
             buttonTitle: this.state.btnTitle,
             buttonLink: this.state.btnLink,
+            buttonTitle2: this.state.btnTitle2,
+            buttonLink2: this.state.btnLink2,
             teams: selectedTeams,
             rosters: selctedRosters,
             groups: selectedGroups,
+            listUsers: this.state.selectedListUsers,
             allUsers: this.state.allUsersOptionSelected,
+            csvUsers: this.state.selectedCsvUsers,
             isScheduled: this.state.selectedSchedule,
             isImportant: this.state.selectedImportant,
             ScheduledDate: new Date(this.state.scheduledDate),
-            Buttons: JSON.stringify(this.state.values)
         };
 
         if (this.state.exists) {
@@ -1062,12 +1184,12 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
     }
 
     private onTitleChanged = (event: any) => {
-        let showDefaultCard = (!event.target.value && !this.state.imageLink && !this.state.summary && !this.state.author && !this.state.btnTitle && !this.state.btnLink);
-        setCardTitle(this.card, event.target.value);
-        setCardImageLink(this.card, this.state.imageLink);
+        let showDefaultCard = (!this.state.title && !event.target.value && !this.state.summary && !this.state.author && !this.state.btnTitle && !this.state.btnLink && !this.state.btnTitle2 && !this.state.btnLink2);
+        setCardTitle(this.card, this.state.title);
+        setCardImageLink(this.card, event.target.value);
         setCardSummary(this.card, this.state.summary);
         setCardAuthor(this.card, this.state.author);
-        setCardBtns(this.card, this.state.values);
+        setCardBtn(this.card, this.state.btnTitle, this.state.btnLink, this.state.btnTitle2, this.state.btnLink2);
         this.setState({
             title: event.target.value,
             card: this.card
@@ -1091,12 +1213,12 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
             });
         }
 
-        let showDefaultCard = (!this.state.title && !event.target.value && !this.state.summary && !this.state.author && !this.state.btnTitle && !this.state.btnLink);
+        let showDefaultCard = (!this.state.title && !event.target.value && !this.state.summary && !this.state.author && !this.state.btnTitle && !this.state.btnLink && !this.state.btnTitle2 && !this.state.btnLink2);
         setCardTitle(this.card, this.state.title);
         setCardImageLink(this.card, event.target.value);
         setCardSummary(this.card, this.state.summary);
         setCardAuthor(this.card, this.state.author);
-        setCardBtns(this.card, this.state.values);
+        setCardBtn(this.card, this.state.btnTitle, this.state.btnLink, this.state.btnTitle2, this.state.btnLink2);
         this.setState({
             imageLink: event.target.value,
             card: this.card
@@ -1109,12 +1231,12 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
     }
 
     private onSummaryChanged = (event: any) => {
-        let showDefaultCard = (!this.state.title && !this.state.imageLink && !event.target.value && !this.state.author && !this.state.btnTitle && !this.state.btnLink);
+        let showDefaultCard = (!this.state.title && !this.state.imageLink && !event.target.value && !this.state.author && !this.state.btnTitle && !this.state.btnLink && !this.state.btnTitle2 && !this.state.btnLink2);
         setCardTitle(this.card, this.state.title);
         setCardImageLink(this.card, this.state.imageLink);
         setCardSummary(this.card, event.target.value);
         setCardAuthor(this.card, this.state.author);
-        setCardBtns(this.card, this.state.values);
+        setCardBtn(this.card, this.state.btnTitle, this.state.btnLink, this.state.btnTitle2, this.state.btnLink2);
         this.setState({
             summary: event.target.value,
             card: this.card
@@ -1128,12 +1250,12 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
 
     //if the author changes, updates the card with appropriate values
     private onAuthorChanged = (event: any) => {
-        let showDefaultCard = (!this.state.title && !this.state.imageLink && !this.state.summary && !event.target.value && !this.state.btnTitle && !this.state.btnLink);
+        let showDefaultCard = (!this.state.title && !this.state.imageLink && !this.state.summary && !event.target.value && !this.state.btnTitle && !this.state.btnLink && !this.state.btnTitle2 && !this.state.btnLink2);
         setCardTitle(this.card, this.state.title);
         setCardImageLink(this.card, this.state.imageLink);
         setCardSummary(this.card, this.state.summary);
         setCardAuthor(this.card, event.target.value);
-        setCardBtns(this.card, this.state.values);
+        setCardBtn(this.card, this.state.btnTitle, this.state.btnLink, this.state.btnTitle2, this.state.btnLink2);
         this.setState({
             author: event.target.value,
             card: this.card
@@ -1145,128 +1267,37 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
         });
     }
 
-    // private function to create the buttons UI
-    private createUI() {
-        if (this.state.values.length > 0) {
-            return this.state.values.map((el, i) =>
-                <Flex gap="gap.smaller" vAlign="center">
-                    <Input className="inputField"
-                        fluid
-                        value={el.title || ''}
-                        placeholder={this.localize("ButtonTitle")}
-                        onChange={this.handleChangeName.bind(this, i)}
-                        autoComplete="off"
-                    />
-                    <Input className="inputField"
-                        fluid
-                        value={el.url || ''}
-                        placeholder={this.localize("ButtonURL")}
-                        onChange={this.handleChangeLink.bind(this, i)}
-                        error={!(this.state.errorButtonUrlMessage === "")}
-                        autoComplete="off"
-                    />
-                    <Button
-                        circular
-                        size="small"
-                        icon={<TrashCanIcon />}
-                        onClick={this.removeClick.bind(this, i)}
-                        title={this.localize("Delete")}
-                    />
-                </Flex>
-            )
-        } else {
-            return (
-                < Flex >
-                    <Text size="small" content={this.localize("NoButtons") } />
-                </Flex>
-            )
-        }
-    }
-
-    //private function to add a new button to the adaptive card
-    private addClick() {
-        const item =
-        {
-            type: "Action.OpenUrl",
-            title: "",
-            url: ""
-        };
+    private onBtnTitleChanged = (event: any) => {
+        const showDefaultCard = (!this.state.title && !this.state.imageLink && !this.state.summary && !this.state.author && !event.target.value && !this.state.btnLink && !this.state.btnTitle2 && !this.state.btnLink2);
+        setCardTitle(this.card, this.state.title);
+        setCardImageLink(this.card, this.state.imageLink);
+        setCardSummary(this.card, this.state.summary);
+        setCardAuthor(this.card, this.state.author);
+        //if (event.target.value && this.state.btnLink) {
+        setCardBtn(this.card, event.target.value, this.state.btnLink, this.state.btnTitle2, this.state.btnLink2);
         this.setState({
-            values: [...this.state.values, item]
+            btnTitle: event.target.value,
+            card: this.card
+        }, () => {
+            if (showDefaultCard) {
+                this.setDefaultCard(this.card);
+            }
+            this.updateCard();
         });
-    }
-
-    //private function to remove a button from the adaptive card
-    private removeClick(i: any) {
-        let values = [...this.state.values];
-        values.splice(i, 1);
-        this.setState({ values });
-
-        const showDefaultCard = (!this.state.title && !this.state.imageLink && !this.state.summary && !this.state.author && values.length == 0);
-        setCardTitle(this.card, this.state.title);
-        setCardImageLink(this.card, this.state.imageLink);
-        setCardSummary(this.card, this.state.summary);
-        setCardAuthor(this.card, this.state.author);
-        if (values.length > 0) { //only if there are buttons created
-            setCardBtns(this.card, values); //update the adaptive card
+        /*} else {
+            delete this.card.actions;
             this.setState({
-                card: this.card
+                btnTitle: event.target.value,
             }, () => {
                 if (showDefaultCard) {
                     this.setDefaultCard(this.card);
                 }
                 this.updateCard();
             });
-        } else {
-            this.setState({
-                errorButtonUrlMessage: ""
-            });
-            delete this.card.actions;
-            if (showDefaultCard) {
-                this.setDefaultCard(this.card);
-            }
-            this.updateCard();
-        };
+        }*/
     }
 
-    //private function to deal with changes in the button names
-    private handleChangeName(i: any, event: any) {
-        let values = [...this.state.values];
-        values[i].title = event.target.value;
-        this.setState({ values });
-
-        const showDefaultCard = (!this.state.title && !this.state.imageLink && !this.state.summary && !this.state.author && !event.target.value && values.length == 0);
-        setCardTitle(this.card, this.state.title);
-        setCardImageLink(this.card, this.state.imageLink);
-        setCardSummary(this.card, this.state.summary);
-        setCardAuthor(this.card, this.state.author);
-        if (values.length > 0) { //only if there are buttons created
-            setCardBtns(this.card, values); //update the adaptive card
-            this.setState({
-                card: this.card
-            }, () => {
-                if (showDefaultCard) {
-                    this.setDefaultCard(this.card);
-                }
-                this.updateCard();
-            });
-        } else {
-            delete this.card.actions;
-            if (showDefaultCard) {
-                this.setDefaultCard(this.card);
-            }
-            this.updateCard();
-        };
-    }
-
-    //private function to deal with changes in the button links/urls
-    private handleChangeLink(i: any, event: any) {
-        let values = [...this.state.values];
-        values[i].url = event.target.value;
-        this.setState({ values });
-
-        //set the error message if the links have wrong values
-        //alert(values.findIndex(element => element.includes("https://")));
+    private onBtnLinkChanged = (event: any) => {
         if (!(event.target.value === "" || event.target.value.toLowerCase().startsWith("https://"))) {
             this.setState({
                 errorButtonUrlMessage: this.localize("ErrorURLMessage")
@@ -1277,28 +1308,103 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
             });
         }
 
-        const showDefaultCard = (!this.state.title && !this.state.imageLink && !this.state.summary && !this.state.author && !event.target.value && values.length == 0);
+        const showDefaultCard = (!this.state.title && !this.state.imageLink && !this.state.summary && !this.state.author && !this.state.btnTitle && !event.target.value && !this.state.btnTitle2 && !this.state.btnLink2);
         setCardTitle(this.card, this.state.title);
-        setCardImageLink(this.card, this.state.imageLink);
         setCardSummary(this.card, this.state.summary);
         setCardAuthor(this.card, this.state.author);
-        if (values.length > 0) {
-            setCardBtns(this.card, values); //update the card
+        setCardImageLink(this.card, this.state.imageLink);
+        //if (this.state.btnTitle && event.target.value) {
+        setCardBtn(this.card, this.state.btnTitle, event.target.value, this.state.btnTitle2, this.state.btnLink2);
+        this.setState({
+            btnLink: event.target.value,
+            card: this.card
+        }, () => {
+            if (showDefaultCard) {
+                this.setDefaultCard(this.card);
+            }
+            this.updateCard();
+        });
+        /*} else {
+            delete this.card.actions;
             this.setState({
-                card: this.card
+                btnLink: event.target.value
             }, () => {
                 if (showDefaultCard) {
                     this.setDefaultCard(this.card);
                 }
                 this.updateCard();
             });
-        } else {
-            delete this.card.actions;
+        }*/
+    }
+
+    private onBtnTitleChanged2 = (event: any) => {
+        const showDefaultCard = (!this.state.title && !this.state.imageLink && !this.state.summary && !this.state.author && !event.target.value && !this.state.btnLink2 && !this.state.btnTitle && !this.state.btnLink);
+        setCardTitle(this.card, this.state.title);
+        setCardImageLink(this.card, this.state.imageLink);
+        setCardSummary(this.card, this.state.summary);
+        setCardAuthor(this.card, this.state.author);
+        //if (event.target.value && this.state.btnLink) {
+        setCardBtn(this.card, this.state.btnTitle, this.state.btnLink, event.target.value, this.state.btnLink2);
+        this.setState({
+            btnTitle2: event.target.value,
+            card: this.card
+        }, () => {
             if (showDefaultCard) {
                 this.setDefaultCard(this.card);
             }
             this.updateCard();
-        };
+        });
+        /*} else {
+            delete this.card.actions;
+            this.setState({
+                btnTitle: event.target.value,
+            }, () => {
+                if (showDefaultCard) {
+                    this.setDefaultCard(this.card);
+                }
+                this.updateCard();
+            });
+        }*/
+    }
+
+    private onBtnLinkChanged2 = (event: any) => {
+        if (!(event.target.value === "" || event.target.value.toLowerCase().startsWith("https://"))) {
+            this.setState({
+                errorButtonUrlMessage2: this.localize("ErrorURLMessage")
+            });
+        } else {
+            this.setState({
+                errorButtonUrlMessage2: ""
+            });
+        }
+
+        const showDefaultCard = (!this.state.title && !this.state.imageLink && !this.state.summary && !this.state.author && !this.state.btnTitle2 && !event.target.value && !this.state.btnTitle && !this.state.btnLink);
+        setCardTitle(this.card, this.state.title);
+        setCardSummary(this.card, this.state.summary);
+        setCardAuthor(this.card, this.state.author);
+        setCardImageLink(this.card, this.state.imageLink);
+        //if (this.state.btnTitle && event.target.value) {
+        setCardBtn(this.card, this.state.btnTitle, this.state.btnLink, this.state.btnTitle2, event.target.value);
+        this.setState({
+            btnLink2: event.target.value,
+            card: this.card
+        }, () => {
+            if (showDefaultCard) {
+                this.setDefaultCard(this.card);
+            }
+            this.updateCard();
+        });
+        /*} else {
+            delete this.card.actions;
+            this.setState({
+                btnLink: event.target.value
+            }, () => {
+                if (showDefaultCard) {
+                    this.setDefaultCard(this.card);
+                }
+                this.updateCard();
+            });
+        }*/
     }
 
     private updateCard = () => {

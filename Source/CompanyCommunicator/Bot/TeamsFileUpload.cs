@@ -5,13 +5,6 @@
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
 {
-    using System;
-    using System.Collections.Generic;
-    using System.IO;
-    using System.Net.Http;
-    using System.Net.Http.Headers;
-    using System.Threading;
-    using System.Threading.Tasks;
     using global::Azure.Storage.Blobs;
     using Microsoft.Bot.Builder;
     using Microsoft.Bot.Schema;
@@ -20,6 +13,13 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.ExportData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Resources;
     using Newtonsoft.Json.Linq;
+    using System;
+    using System.Collections.Generic;
+    using System.IO;
+    using System.Net.Http;
+    using System.Net.Http.Headers;
+    using System.Threading;
+    using System.Threading.Tasks;
 
     /// <summary>
     /// Service to upload file to user's one drive.

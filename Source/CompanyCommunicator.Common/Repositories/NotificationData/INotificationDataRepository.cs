@@ -46,8 +46,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
         /// Move a draft notification from draft to sent partition.
         /// </summary>
         /// <param name="draftNotificationEntity">The draft notification instance to be moved to the sent partition.</param>
+        /// <param name="appUrl">The url of the app.</param>
         /// <returns>The new SentNotification ID.</returns>
-        public Task<string> MoveDraftToSentPartitionAsync(NotificationDataEntity draftNotificationEntity);
+        public Task<string> MoveDraftToSentPartitionAsync(NotificationDataEntity draftNotificationEntity, string appUrl);
 
         /// <summary>
         /// Duplicate an existing draft notification.

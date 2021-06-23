@@ -8,8 +8,6 @@
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Data.Func
 {
-    using System;
-    using System.Globalization;
     using global::Azure.Storage.Blobs;
     using Microsoft.Azure.Functions.Extensions.DependencyInjection;
     using Microsoft.Bot.Builder.Integration.AspNet.Core;
@@ -26,6 +24,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Data.Func
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues.DataQueue;
     using Microsoft.Teams.Apps.CompanyCommunicator.Data.Func.Services.FileCardServices;
     using Microsoft.Teams.Apps.CompanyCommunicator.Data.Func.Services.NotificationDataServices;
+    using System;
+    using System.Globalization;
 
     /// <summary>
     /// Register services in DI container of the Azure functions system.

@@ -5,9 +5,9 @@
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Data.Func.Services.NotificationDataServices
 {
-    using System;
     using Microsoft.Azure.Cosmos.Table;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
+    using System;
 
     /// <summary>
     /// A subset of the full NotificationDataEntity setting fields as nullable in order to

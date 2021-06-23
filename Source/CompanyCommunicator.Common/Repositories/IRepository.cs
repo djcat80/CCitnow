@@ -5,10 +5,10 @@
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories
 {
+    using Microsoft.Azure.Cosmos.Table;
     using System;
     using System.Collections.Generic;
     using System.Threading.Tasks;
-    using Microsoft.Azure.Cosmos.Table;
 
     /// <summary>
     /// Base repository Interface.

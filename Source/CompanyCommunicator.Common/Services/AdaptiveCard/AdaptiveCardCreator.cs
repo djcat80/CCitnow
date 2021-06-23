@@ -5,11 +5,9 @@
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.AdaptiveCard
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Text.Json;
     using AdaptiveCards;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
+    using System;
 
     /// <summary>
     /// Adaptive Card Creator service.
@@ -30,7 +28,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.AdaptiveCard
                 notificationDataEntity.Author,
                 notificationDataEntity.ButtonTitle,
                 notificationDataEntity.ButtonLink,
-                notificationDataEntity.Buttons);
+                notificationDataEntity.ButtonTitle2,
+                notificationDataEntity.ButtonLink2,
+                notificationDataEntity.IsDraft,
+                notificationDataEntity.Id);
         }
 
         /// <summary>
@@ -42,7 +43,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.AdaptiveCard
         /// <param name="author">The adaptive card's author value.</param>
         /// <param name="buttonTitle">The adaptive card's button title value.</param>
         /// <param name="buttonUrl">The adaptive card's button url value.</param>
-        /// <param name="buttons">The adaptive card's collection of buttons.</param>
+        /// <param name="buttonTitle2">The adaptive card's button 2 title value.</param>
+        /// <param name="buttonUrl2">The adaptive card's button 2 url value.</param>
+        /// <param name="isDraft">True if it is a card for draft.</param>
+        /// <param name="notificationID">ID of the notification.</param>
         /// <returns>The created adaptive card instance.</returns>
         public AdaptiveCard CreateAdaptiveCard(
             string title,
@@ -51,7 +55,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.AdaptiveCard
             string author,
             string buttonTitle,
             string buttonUrl,
-            string buttons)
+            string buttonTitle2,
+            string buttonUrl2,
+            bool isDraft = false,
+            string notificationID = "")
         {
             var version = new AdaptiveSchemaVersion(1, 0);
             AdaptiveCard card = new AdaptiveCard(version);
@@ -96,8 +103,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.AdaptiveCard
             }
 
             if (!string.IsNullOrWhiteSpace(buttonTitle)
-                && !string.IsNullOrWhiteSpace(buttonUrl)
-                && string.IsNullOrWhiteSpace(buttons))
+                    && !string.IsNullOrWhiteSpace(buttonUrl))
             {
                 card.Actions.Add(new AdaptiveOpenUrlAction()
                 {
@@ -106,16 +112,30 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.AdaptiveCard
                 });
             }
 
-            if (!string.IsNullOrWhiteSpace(buttons))
+            if (!string.IsNullOrWhiteSpace(buttonTitle2))
             {
-                // enables case insensitive deserialization for card buttons
-                var options = new JsonSerializerOptions
+                if (isDraft || !string.IsNullOrWhiteSpace(buttonUrl2))
                 {
-                    PropertyNameCaseInsensitive = true,
-                };
-
-                // add the buttons string to the buttons collection for the card
-                card.Actions.AddRange(JsonSerializer.Deserialize<List<AdaptiveOpenUrlAction>>(buttons, options));
+                    card.Actions.Add(new AdaptiveOpenUrlAction()
+                    {
+                        Title = buttonTitle2,
+                        Url = new Uri(buttonUrl2, UriKind.RelativeOrAbsolute),
+                    });
+                }
+                else
+                {
+                    card.Actions.Add(new AdaptiveSubmitAction()
+                    {
+                        Title = buttonTitle2,
+                        Type = AdaptiveSubmitAction.TypeName,
+                        DataJson = string.Format(
+                            @"{{
+                                ""url"":  ""{0}"",
+                                ""buttonID"": ""2"",
+                                ""notificationID"": ""{1}""
+                            }}", buttonUrl2, notificationID),
+                    });
+                }
             }
 
             return card;

@@ -5,10 +5,6 @@
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator.DraftNotificationPreview
 {
-    using System;
-    using System.Net;
-    using System.Threading;
-    using System.Threading.Tasks;
     using AdaptiveCards;
     using Microsoft.Bot.Builder;
     using Microsoft.Bot.Schema;
@@ -18,6 +14,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.DraftNotificationPreview
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.TeamData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.AdaptiveCard;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.CommonBot;
+    using System;
+    using System.Net;
+    using System.Threading;
+    using System.Threading.Tasks;
 
     /// <summary>
     /// Draft notification preview service.
@@ -140,7 +140,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.DraftNotificationPreview
                 draftNotificationEntity.Author,
                 draftNotificationEntity.ButtonTitle,
                 draftNotificationEntity.ButtonLink,
-                draftNotificationEntity.Buttons);
+                draftNotificationEntity.ButtonTitle2,
+                draftNotificationEntity.ButtonLink2,
+                true);
 
             var attachment = new Attachment
             {

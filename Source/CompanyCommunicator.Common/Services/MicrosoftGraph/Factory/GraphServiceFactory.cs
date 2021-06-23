@@ -5,8 +5,8 @@
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGraph
 {
-    using System;
     using Microsoft.Graph;
+    using System;
 
     /// <summary>
     /// Graph Service Factory.

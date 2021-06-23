@@ -98,6 +98,13 @@
   "ScheduledSendDescription": "Seleccione una fecha y hora para programar el mensaje. Por favor, programe al menos 30 minutos en el futuro.",
   "Add": "Agregar",
   "Buttons": "Botones",
-  "NoButtons": "Sin botones definidos. Haga clic en (+) para incluir botones y acciones en el mensaje."
+  "NoButtons": "Sin botones definidos. Haga clic en (+) para incluir botones y acciones en el mensaje.",
+  "SendToList": "Enviar en chat a una lista de usuarios, introducida como una lista de mails de usuario separados por ;",
+  "SendToCsv": "Enviar en chat a una lista de usuarios, leida de un fichero csv como una lista de mails de usuario separados por ;",
+  "SendToListPlaceholder": "Ej: user1@contoso.com;user2@contoso.com",
+  "ListUsersLabel": "Usuarios: ",
+  "ButtonTitle2": "Título del botón 2",
+  "ButtonURL2": "URL del botón 2",
+  "ButtonURL2Holder": "Dejar vacía si se quiere un boton de confirmación de recepción"
 }
   

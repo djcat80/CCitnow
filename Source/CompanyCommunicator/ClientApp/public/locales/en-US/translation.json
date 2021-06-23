@@ -98,5 +98,12 @@
   "ScheduledSendDescription": "Select a date and time to schedule your message. Please schedule at least 30 minutes in the future.",
   "Add": "Add",
   "Buttons": "Buttons",
-  "NoButtons": "No buttons defined. Click (+) to include buttons and actions on the message."
+  "NoButtons": "No buttons defined. Click (+) to include buttons and actions on the message.",
+  "SendToList": "Send in chat to a list of users, despliced by a list of users mails separated by ;",
+  "SendToCsv": "Send in chat to a list of users, readed from a csv file as a list of users mails separated by ;",
+  "SendToListPlaceholder": "Eg: user1@contoso.com;user2@contoso.com",
+  "ListUsersLabel": "Users: ",
+  "ButtonTitle2": "Button title 2",
+  "ButtonURL2": "Button URL 2",
+  "ButtonURL2Holder": "Leave empty if you want a confirmed reception button."
 }

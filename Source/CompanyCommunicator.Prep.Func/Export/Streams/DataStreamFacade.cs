@@ -5,10 +5,6 @@
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Streams
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Net;
     using Microsoft.Extensions.Localization;
     using Microsoft.Graph;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotificationData;
@@ -18,6 +14,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Streams
     using Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Extensions;
     using Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Model;
     using Newtonsoft.Json;
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Net;
 
     /// <summary>
     /// Facade to get the data stream.

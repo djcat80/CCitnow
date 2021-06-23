@@ -37,7 +37,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator
                })
                .ConfigureServices(services =>
                {
-                services.AddHostedService<SendMessageScheduler>();
+                   services.AddHostedService<SendMessageScheduler>();
                });
     }
 }

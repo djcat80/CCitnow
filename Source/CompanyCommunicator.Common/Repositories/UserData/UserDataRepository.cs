@@ -4,11 +4,11 @@
 // </copyright>
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.UserData
 {
-    using System;
-    using System.Threading.Tasks;
     using Microsoft.Azure.Cosmos.Table;
     using Microsoft.Extensions.Logging;
     using Microsoft.Extensions.Options;
+    using System;
+    using System.Threading.Tasks;
 
     /// <summary>
     /// Repository of the user data stored in the table storage.

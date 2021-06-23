@@ -5,12 +5,15 @@
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
 {
-    using System;
-    using System.Threading.Tasks;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.Bot.Builder;
     using Microsoft.Bot.Builder.Integration.AspNet.Core;
+    using Microsoft.Bot.Schema;
     using Microsoft.Teams.Apps.CompanyCommunicator.Bot;
+    using System;
+    using System.Net;
+    using System.Net.Http;
+    using System.Threading.Tasks;
 
     /// <summary>
     /// Message controller for the bot.
@@ -64,6 +67,24 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         public async Task PostAuthorAsync()
         {
             await this.adapter.ProcessAsync(this.Request, this.Response, this.authorBot);
+        }
+
+        [HttpPost]
+        public async Task<HttpResponseMessage> Post([FromBody] Activity activity)
+        {
+            if (activity.Type == ActivityTypes.Message)
+            {
+                var act = activity;
+            }
+            else if (activity.Type == ActivityTypes.Invoke)
+            {
+                var act = activity;
+            }
+            else
+            {
+                var act = activity;
+            }
+            return new HttpResponseMessage(HttpStatusCode.Accepted);
         }
     }
 }

@@ -5,12 +5,12 @@
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Adapter
 {
-    using System.Threading;
-    using System.Threading.Tasks;
     using Microsoft.Bot.Builder;
     using Microsoft.Bot.Builder.Integration.AspNet.Core;
     using Microsoft.Bot.Connector.Authentication;
     using Microsoft.Bot.Schema;
+    using System.Threading;
+    using System.Threading.Tasks;
 
     /// <summary>
     /// Bot framework http adapter instance.

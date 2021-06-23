@@ -5,12 +5,12 @@
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Models
 {
+    using Microsoft.Extensions.Localization;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Resources;
     using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Text;
-    using Microsoft.Extensions.Localization;
-    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Resources;
 
     /// <summary>
     /// Draft notification model class.
@@ -52,6 +52,26 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Models
         /// Gets or sets ScheduledDate value.
         /// </summary>
         public DateTime? ScheduledDate { get; set; }
+
+        /// <summary>
+        /// Gets or sets Groups audience id collection.
+        /// </summary>
+        public IEnumerable<string> ListUsers { get; set; }
+
+        /// <summary>
+        /// Gets or sets Groups audience id collection.
+        /// </summary>
+        public IEnumerable<string> CsvUsers { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether the message is scheduled.
+        /// </summary>
+        public bool IsScheduled { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether the message is important.
+        /// </summary>
+        public bool IsImportant { get; set; }
 
         /// <summary>
         /// Validates a draft notification.

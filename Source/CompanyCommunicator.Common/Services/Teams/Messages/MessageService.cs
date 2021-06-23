@@ -5,10 +5,6 @@
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.Teams
 {
-    using System;
-    using System.Net;
-    using System.Threading;
-    using System.Threading.Tasks;
     using Microsoft.Bot.Builder.Integration.AspNet.Core;
     using Microsoft.Bot.Schema;
     using Microsoft.Extensions.Logging;
@@ -17,6 +13,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.Teams
     using Polly;
     using Polly.Contrib.WaitAndRetry;
     using Polly.Retry;
+    using System;
+    using System.Net;
+    using System.Threading;
+    using System.Threading.Tasks;
 
     /// <summary>
     /// Teams message service.

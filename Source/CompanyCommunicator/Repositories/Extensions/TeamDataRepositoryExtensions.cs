@@ -5,10 +5,10 @@
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Repositories.Extensions
 {
-    using System.Threading.Tasks;
     using Microsoft.Bot.Schema;
     using Microsoft.Bot.Schema.Teams;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.TeamData;
+    using System.Threading.Tasks;
 
     /// <summary>
     /// Extensions for the repository of the team data stored in the table storage.

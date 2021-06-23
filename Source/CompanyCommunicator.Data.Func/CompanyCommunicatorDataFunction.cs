@@ -5,8 +5,6 @@
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Data.Func
 {
-    using System;
-    using System.Threading.Tasks;
     using Microsoft.Azure.WebJobs;
     using Microsoft.Extensions.Logging;
     using Microsoft.Extensions.Options;
@@ -15,6 +13,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Data.Func
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues.DataQueue;
     using Microsoft.Teams.Apps.CompanyCommunicator.Data.Func.Services.NotificationDataServices;
     using Newtonsoft.Json;
+    using System;
+    using System.Threading.Tasks;
 
     /// <summary>
     /// Azure Function App triggered by messages from a Service Bus queue

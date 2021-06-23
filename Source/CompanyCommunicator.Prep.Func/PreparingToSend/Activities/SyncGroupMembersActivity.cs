@@ -5,11 +5,6 @@
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
 {
-    using System;
-    using System.Collections.Concurrent;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Threading.Tasks;
     using Microsoft.Azure.WebJobs;
     using Microsoft.Azure.WebJobs.Extensions.DurableTask;
     using Microsoft.Extensions.Localization;
@@ -22,6 +17,11 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Resources;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGraph;
     using Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend.Extensions;
+    using System;
+    using System.Collections.Concurrent;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Threading.Tasks;
 
     /// <summary>
     /// Syncs group members to Sent notification table.
@@ -64,7 +64,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
         /// <returns>It returns the group transitive members first page and next page url.</returns>
         [FunctionName(FunctionNames.SyncGroupMembersActivity)]
         public async Task RunAsync(
-        [ActivityTrigger](string notificationId, string groupId) input, ILogger log)
+        [ActivityTrigger] (string notificationId, string groupId) input, ILogger log)
         {
             if (input.notificationId == null)
             {
@@ -123,6 +123,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
                     userEntity = new UserDataEntity()
                     {
                         AadId = user.Id,
+                        Email = user.UserPrincipalName,
+                        Name = user.DisplayName,
                     };
                 }
 

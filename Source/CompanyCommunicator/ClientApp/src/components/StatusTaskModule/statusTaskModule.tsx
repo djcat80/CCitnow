@@ -12,7 +12,7 @@ import { Loader, List, Image, Button, DownloadIcon, AcceptIcon, Flex } from '@fl
 import * as microsoftTeams from "@microsoft/teams-js";
 import {
     getInitAdaptiveCard, setCardTitle, setCardImageLink, setCardSummary,
-    setCardAuthor, setCardBtns
+    setCardAuthor, setCardBtn
 } from '../AdaptiveCard/adaptiveCard';
 import { ImageUtil } from '../../utility/imageutility';
 import { formatDate, formatDuration, formatNumber } from '../../i18n';
@@ -38,6 +38,8 @@ export interface IMessage {
     author?: string;
     buttonLink?: string;
     buttonTitle?: string;
+    buttonLink2?: string;
+    buttonTitle2?: string;
     teamNames?: string[];
     rosterNames?: string[];
     groupNames?: string[];
@@ -48,7 +50,6 @@ export interface IMessage {
     warningMessage?: string;
     canDownload?: boolean;
     sendingCompleted?: boolean;
-    buttons: string;
     isImportant?: boolean;
 }
 
@@ -66,7 +67,6 @@ class StatusTaskModule extends React.Component<StatusTaskModuleProps, IStatusSta
     private initMessage = {
         id: "",
         title: "",
-        buttons: "[]",
     };
 
     private card: any;
@@ -106,17 +106,9 @@ class StatusTaskModule extends React.Component<StatusTaskModuleProps, IStatusSta
                     setCardSummary(this.card, this.state.message.summary);
                     setCardAuthor(this.card, this.state.message.author);
                         
-                    if (this.state.message.buttonTitle && this.state.message.buttonLink && !this.state.message.buttons) {
-                        setCardBtns(this.card, [{
-                            "type": "Action.OpenUrl",
-                            "title": this.state.message.buttonTitle,
-                            "url": this.state.message.buttonLink,
-                        }]);
-                        }
-                        else {
-                            setCardBtns(this.card, JSON.parse(this.state.message.buttons));
+                    if ((this.state.message.buttonTitle && this.state.message.buttonLink) || (this.state.message.buttonTitle2 && this.state.message.buttonLink2)) {
+                        setCardBtn(this.card, this.state.message.buttonTitle, this.state.message.buttonLink, this.state.message.buttonTitle2, this.state.message.buttonLink2);
                     }
-
                     let adaptiveCard = new AdaptiveCards.AdaptiveCard();
                     adaptiveCard.parse(this.card);
                     let renderedCard = adaptiveCard.render();

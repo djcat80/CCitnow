@@ -5,9 +5,6 @@
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Data.Func.Services.FileCardServices
 {
-    using System;
-    using System.Threading;
-    using System.Threading.Tasks;
     using Microsoft.Bot.Builder;
     using Microsoft.Bot.Builder.Integration.AspNet.Core;
     using Microsoft.Bot.Schema;
@@ -17,6 +14,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Data.Func.Services.FileCardSe
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Resources;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.CommonBot;
     using Polly;
+    using System;
+    using System.Threading;
+    using System.Threading.Tasks;
 
     /// <summary>
     /// The file card service to manange the card.

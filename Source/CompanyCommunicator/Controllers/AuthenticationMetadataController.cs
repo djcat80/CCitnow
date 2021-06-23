@@ -5,13 +5,13 @@
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
 {
+    using Microsoft.AspNetCore.Mvc;
+    using Microsoft.Extensions.Options;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Authentication;
     using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Web;
-    using Microsoft.AspNetCore.Mvc;
-    using Microsoft.Extensions.Options;
-    using Microsoft.Teams.Apps.CompanyCommunicator.Authentication;
 
     /// <summary>
     /// Controller for the authentication sign in data.
@@ -45,8 +45,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         /// <returns>Conset Url.</returns>
         [HttpGet("consentUrl")]
         public string GetConsentUrl(
-            [FromQuery]string windowLocationOriginDomain,
-            [FromQuery]string loginHint)
+            [FromQuery] string windowLocationOriginDomain,
+            [FromQuery] string loginHint)
         {
             if (windowLocationOriginDomain == null)
             {

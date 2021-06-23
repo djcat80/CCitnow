@@ -5,12 +5,6 @@
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Activities
 {
-    using System;
-    using System.Globalization;
-    using System.IO;
-    using System.IO.Compression;
-    using System.Linq;
-    using System.Threading.Tasks;
     using CsvHelper;
     using global::Azure.Storage.Blobs.Models;
     using Microsoft.Azure.WebJobs;
@@ -23,6 +17,12 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Activities
     using Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Model;
     using Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Streams;
     using Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend;
+    using System;
+    using System.Globalization;
+    using System.IO;
+    using System.IO.Compression;
+    using System.Linq;
+    using System.Threading.Tasks;
 
     /// <summary>
     /// Uploads the file to the blob storage.
@@ -56,7 +56,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Activities
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         [FunctionName(FunctionNames.UploadActivity)]
         public async Task UploadActivityAsync(
-            [ActivityTrigger](NotificationDataEntity sentNotificationDataEntity, Metadata metadata, string fileName) uploadData)
+            [ActivityTrigger] (NotificationDataEntity sentNotificationDataEntity, Metadata metadata, string fileName) uploadData)
         {
             if (uploadData.sentNotificationDataEntity == null)
             {

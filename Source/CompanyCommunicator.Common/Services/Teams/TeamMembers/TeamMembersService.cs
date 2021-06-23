@@ -5,11 +5,6 @@
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.Teams
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Threading;
-    using System.Threading.Tasks;
     using Microsoft.Bot.Builder;
     using Microsoft.Bot.Builder.Integration.AspNet.Core;
     using Microsoft.Bot.Builder.Teams;
@@ -18,6 +13,11 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.Teams
     using Microsoft.Extensions.Options;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.UserData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.CommonBot;
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Threading;
+    using System.Threading.Tasks;
 
     /// <summary>
     /// Teams member service.
@@ -86,6 +86,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.Teams
                             ServiceUrl = serviceUrl,
                             AadId = member.AadObjectId,
                             TenantId = tenantId,
+                            Email = member.Email,
+                            Name = member.Name,
                         };
 
                         return userDataEntity;

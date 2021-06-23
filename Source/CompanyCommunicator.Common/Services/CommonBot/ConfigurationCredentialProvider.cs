@@ -5,12 +5,12 @@
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.CommonBot
 {
+    using Microsoft.Bot.Connector.Authentication;
+    using Microsoft.Extensions.Options;
     using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
-    using Microsoft.Bot.Connector.Authentication;
-    using Microsoft.Extensions.Options;
 
     /// <summary>
     /// This class implements ICredentialProvider, which is used by the bot framework to retrieve credential info.

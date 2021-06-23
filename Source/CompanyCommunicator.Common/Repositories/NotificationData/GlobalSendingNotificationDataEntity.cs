@@ -5,8 +5,8 @@
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData
 {
-    using System;
     using Microsoft.Azure.Cosmos.Table;
+    using System;
 
     /// <summary>
     /// Entity that holds metadata for all sending operations.

@@ -5,9 +5,9 @@
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Pages
 {
-    using System.Diagnostics;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.AspNetCore.Mvc.RazorPages;
+    using System.Diagnostics;
 
     /// <summary>
     /// Error model class.

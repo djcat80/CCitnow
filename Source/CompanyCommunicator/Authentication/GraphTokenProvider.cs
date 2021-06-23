@@ -5,14 +5,14 @@
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Authentication
 {
+    using Microsoft.Graph;
+    using Microsoft.Identity.Web;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGraph;
     using System;
     using System.Linq;
     using System.Net.Http;
     using System.Net.Http.Headers;
     using System.Threading.Tasks;
-    using Microsoft.Graph;
-    using Microsoft.Identity.Web;
-    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGraph;
 
     /// <summary>
     /// Add Access Token to Graph Api.

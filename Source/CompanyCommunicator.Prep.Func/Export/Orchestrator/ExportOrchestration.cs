@@ -5,14 +5,14 @@
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Orchestrator
 {
-    using System;
-    using System.Threading.Tasks;
     using Microsoft.Azure.WebJobs;
     using Microsoft.Azure.WebJobs.Extensions.DurableTask;
     using Microsoft.Extensions.Logging;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.ExportData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Model;
     using Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend;
+    using System;
+    using System.Threading.Tasks;
 
     /// <summary>
     /// This class is the durable framework orchestration for exporting notifications.

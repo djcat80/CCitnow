@@ -37,6 +37,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Test.Controllers
         private readonly Mock<ITeamDataRepository> teamDataRepository = new Mock<ITeamDataRepository>();
         private readonly Mock<IDraftNotificationPreviewService> draftNotificationPreviewService = new Mock<IDraftNotificationPreviewService>();
         private readonly Mock<IGroupsService> groupsService = new Mock<IGroupsService>();
+        private readonly Mock<IUsersService> usersService = new Mock<IUsersService>();
         private readonly Mock<IAppSettingsService> appSettingsService = new Mock<IAppSettingsService>();
         private readonly Mock<IStringLocalizer<Strings>> localizer = new Mock<IStringLocalizer<Strings>>();
         private readonly string notificationId = "notificationId";
@@ -65,7 +66,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Test.Controllers
         public void CreateInstance_AllParameters_ShouldBeSuccess()
         {
             // Arrange
-            Action action = () => new DraftNotificationsController(this.notificationDataRepository.Object, this.teamDataRepository.Object, this.draftNotificationPreviewService.Object, this.appSettingsService.Object, this.localizer.Object, this.groupsService.Object);
+            Action action = () => new DraftNotificationsController(this.notificationDataRepository.Object, this.teamDataRepository.Object, this.draftNotificationPreviewService.Object, this.appSettingsService.Object, this.localizer.Object, this.groupsService.Object, this.usersService.Object);
 
             // Act and Assert.
             action.Should().NotThrow();
@@ -78,12 +79,13 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Test.Controllers
         public void CreateInstance_NullParameter_ThrowsArgumentNullException()
         {
             // Arrange
-            Action action1 = () => new DraftNotificationsController(null /*notificationDataRepository*/, this.teamDataRepository.Object, this.draftNotificationPreviewService.Object, this.appSettingsService.Object, this.localizer.Object, this.groupsService.Object);
-            Action action2 = () => new DraftNotificationsController(this.notificationDataRepository.Object, null /*teamDataRepository*/, this.draftNotificationPreviewService.Object, this.appSettingsService.Object, this.localizer.Object, this.groupsService.Object);
-            Action action3 = () => new DraftNotificationsController(this.notificationDataRepository.Object, this.teamDataRepository.Object, null /*draftNotificationPreviewService*/, this.appSettingsService.Object, this.localizer.Object, this.groupsService.Object);
-            Action action4 = () => new DraftNotificationsController(this.notificationDataRepository.Object, this.teamDataRepository.Object, this.draftNotificationPreviewService.Object, null /*appSettingsService*/, this.localizer.Object, this.groupsService.Object);
-            Action action5 = () => new DraftNotificationsController(this.notificationDataRepository.Object, this.teamDataRepository.Object, this.draftNotificationPreviewService.Object, this.appSettingsService.Object, null /*localizer*/, this.groupsService.Object);
-            Action action6 = () => new DraftNotificationsController(this.notificationDataRepository.Object, this.teamDataRepository.Object, this.draftNotificationPreviewService.Object, this.appSettingsService.Object, this.localizer.Object, null/*groupsService*/);
+            Action action1 = () => new DraftNotificationsController(null /*notificationDataRepository*/, this.teamDataRepository.Object, this.draftNotificationPreviewService.Object, this.appSettingsService.Object, this.localizer.Object, this.groupsService.Object, this.usersService.Object);
+            Action action2 = () => new DraftNotificationsController(this.notificationDataRepository.Object, null /*teamDataRepository*/, this.draftNotificationPreviewService.Object, this.appSettingsService.Object, this.localizer.Object, this.groupsService.Object, this.usersService.Object);
+            Action action3 = () => new DraftNotificationsController(this.notificationDataRepository.Object, this.teamDataRepository.Object, null /*draftNotificationPreviewService*/, this.appSettingsService.Object, this.localizer.Object, this.groupsService.Object, this.usersService.Object);
+            Action action4 = () => new DraftNotificationsController(this.notificationDataRepository.Object, this.teamDataRepository.Object, this.draftNotificationPreviewService.Object, null /*appSettingsService*/, this.localizer.Object, this.groupsService.Object, this.usersService.Object);
+            Action action5 = () => new DraftNotificationsController(this.notificationDataRepository.Object, this.teamDataRepository.Object, this.draftNotificationPreviewService.Object, this.appSettingsService.Object, null /*localizer*/, this.groupsService.Object, this.usersService.Object);
+            Action action6 = () => new DraftNotificationsController(this.notificationDataRepository.Object, this.teamDataRepository.Object, this.draftNotificationPreviewService.Object, this.appSettingsService.Object, this.localizer.Object, null/*groupsService*/, this.usersService.Object);
+            Action action7 = () => new DraftNotificationsController(this.notificationDataRepository.Object, this.teamDataRepository.Object, this.draftNotificationPreviewService.Object, this.appSettingsService.Object, this.localizer.Object, this.groupsService.Object, null /*usersService*/);
 
             // Act and Assert.
             action1.Should().Throw<ArgumentNullException>("notificationDataRepository is null.");
@@ -92,6 +94,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Test.Controllers
             action4.Should().Throw<ArgumentNullException>("appSettingsService is null.");
             action5.Should().Throw<ArgumentNullException>("localizer is null.");
             action6.Should().Throw<ArgumentNullException>("groupsService is null.");
+            action7.Should().Throw<ArgumentNullException>("usersService is null.");
         }
 
         /// <summary>
@@ -826,6 +829,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Test.Controllers
                 TeamsInString = "['data1','data1']",
                 RostersInString = "['data1','data1']",
                 GroupsInString = "['group1','group2']",
+                ListUsersInString = "['user1@contoso.com', 'user2@contoso.com']",
                 AllUsers = true,
             };
             var groupList = new List<Group>() { new Group() { Id = "Id1", DisplayName = "group1" }, new Group() { Id = "Id2", DisplayName = "group2" } };
@@ -862,6 +866,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Test.Controllers
                 TeamsInString = "['team1','team2']",
                 RostersInString = "['roster1','roster2']",
                 GroupsInString = "['group1','group2']",
+                ListUsersInString = "['user1@contoso.com', 'user2@contoso.com']",
                 AllUsers = true,
             };
             var groupList = new List<Group>() { new Group() };
@@ -961,7 +966,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Test.Controllers
         {
             this.notificationDataRepository.Setup(x => x.TableRowKeyGenerator).Returns(new TableRowKeyGenerator());
             this.notificationDataRepository.Setup(x => x.TableRowKeyGenerator.CreateNewKeyOrderingOldestToMostRecent()).Returns(this.notificationId);
-            var controller = new DraftNotificationsController(this.notificationDataRepository.Object, this.teamDataRepository.Object, this.draftNotificationPreviewService.Object, this.appSettingsService.Object, this.localizer.Object, this.groupsService.Object);
+            var controller = new DraftNotificationsController(this.notificationDataRepository.Object, this.teamDataRepository.Object, this.draftNotificationPreviewService.Object, this.appSettingsService.Object, this.localizer.Object, this.groupsService.Object, this.usersService.Object);
             var user = new ClaimsPrincipal(new ClaimsIdentity());
             controller.ControllerContext = new ControllerContext();
             controller.ControllerContext.HttpContext = new DefaultHttpContext { User = user };

@@ -5,9 +5,9 @@
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.Teams
 {
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.UserData;
     using System.Collections.Generic;
     using System.Threading.Tasks;
-    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.UserData;
 
     /// <summary>
     /// Team Members service interface.

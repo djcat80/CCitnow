@@ -5,9 +5,9 @@
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services
 {
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories;
     using System;
     using System.Threading.Tasks;
-    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories;
 
     /// <summary>
     /// App settings service implementation.

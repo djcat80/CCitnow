@@ -5,10 +5,10 @@
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator.DraftNotificationPreview
 {
-    using System.Net;
-    using System.Threading.Tasks;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.TeamData;
+    using System.Net;
+    using System.Threading.Tasks;
 
     /// <summary>
     /// Interface for DraftNotificationPreviewService.

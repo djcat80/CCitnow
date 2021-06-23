@@ -5,9 +5,6 @@
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
 {
-    using System;
-    using System.Net;
-    using System.Threading.Tasks;
     using Microsoft.Azure.WebJobs;
     using Microsoft.Azure.WebJobs.Extensions.DurableTask;
     using Microsoft.Extensions.Localization;
@@ -21,6 +18,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGraph;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.Teams;
+    using System;
+    using System.Net;
+    using System.Threading.Tasks;
 
     /// <summary>
     /// Teams conversation activity.
@@ -82,7 +82,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         [FunctionName(FunctionNames.TeamsConversationActivity)]
         public async Task CreateConversationAsync(
-            [ActivityTrigger](string notificationId, SentNotificationDataEntity recipient) input,
+            [ActivityTrigger] (string notificationId, SentNotificationDataEntity recipient) input,
             ILogger log)
         {
             if (input.notificationId == null)
@@ -253,6 +253,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
                 ConversationId = recipient.ConversationId,
                 ServiceUrl = recipient.ServiceUrl,
                 TenantId = recipient.TenantId,
+                Email = recipient.RecipientMail,
+                Name = recipient.RecipientName,
             };
 
             await this.userDataRepository.InsertOrMergeAsync(user);

@@ -8,8 +8,6 @@
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func
 {
-    using System;
-    using System.Globalization;
     using Microsoft.Azure.Functions.Extensions.DependencyInjection;
     using Microsoft.Bot.Builder.Integration.AspNet.Core;
     using Microsoft.Bot.Connector.Authentication;
@@ -37,6 +35,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.Teams;
     using Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Streams;
     using Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend;
+    using System;
+    using System.Globalization;
 
     /// <summary>
     /// Register services in DI container of the Azure functions system.

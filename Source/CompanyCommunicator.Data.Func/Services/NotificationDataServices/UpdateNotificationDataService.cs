@@ -5,11 +5,11 @@
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Data.Func.Services.NotificationDataServices
 {
-    using System;
-    using System.Threading.Tasks;
     using Microsoft.Azure.Cosmos.Table;
     using Microsoft.Extensions.Logging;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
+    using System;
+    using System.Threading.Tasks;
 
     /// <summary>
     /// Service to update notification data.

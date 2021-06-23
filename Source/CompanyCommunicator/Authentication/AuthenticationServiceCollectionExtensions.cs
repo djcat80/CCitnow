@@ -5,9 +5,6 @@
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Authentication
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
     using Microsoft.AspNetCore.Authentication.AzureAD.UI;
     using Microsoft.AspNetCore.Authentication.JwtBearer;
     using Microsoft.AspNetCore.Authorization;
@@ -16,6 +13,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Authentication
     using Microsoft.Identity.Web;
     using Microsoft.Identity.Web.TokenCacheProviders.InMemory;
     using Microsoft.IdentityModel.Tokens;
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
 
     /// <summary>
     /// Extension class for registering auth services in DI container.

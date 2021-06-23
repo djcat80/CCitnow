@@ -5,9 +5,9 @@
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.ExportData
 {
-    using System.Threading.Tasks;
     using Microsoft.Extensions.Logging;
     using Microsoft.Extensions.Options;
+    using System.Threading.Tasks;
 
     /// <summary>
     /// Repository of the export data stored in the table storage.

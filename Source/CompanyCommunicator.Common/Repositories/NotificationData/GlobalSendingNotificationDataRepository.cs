@@ -5,9 +5,9 @@
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData
 {
-    using System.Threading.Tasks;
     using Microsoft.Extensions.Logging;
     using Microsoft.Extensions.Options;
+    using System.Threading.Tasks;
 
     /// <summary>
     /// Repository for the entity that holds meta-data for all sending operations in the table storage.

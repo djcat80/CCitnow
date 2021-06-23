@@ -5,7 +5,6 @@
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator
 {
-    using System.Net;
     using global::Azure.Storage.Blobs;
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Diagnostics;
@@ -24,6 +23,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.ExportData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.ReceivedNotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.TeamData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.UserData;
@@ -41,6 +41,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator
     using Microsoft.Teams.Apps.CompanyCommunicator.Controllers.Options;
     using Microsoft.Teams.Apps.CompanyCommunicator.DraftNotificationPreview;
     using Microsoft.Teams.Apps.CompanyCommunicator.Localization;
+    using System.Net;
 
     /// <summary>
     /// Register services in DI container, and set up middle-wares in the pipeline.
@@ -54,6 +55,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator
         public Startup(IConfiguration configuration)
         {
             this.Configuration = configuration;
+            MyAppData.configuration = configuration;
         }
 
         /// <summary>
@@ -162,7 +164,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator
             services.AddSingleton<ITeamDataRepository, TeamDataRepository>();
             services.AddSingleton<IUserDataRepository, UserDataRepository>();
             services.AddSingleton<ISentNotificationDataRepository, SentNotificationDataRepository>();
+            services.AddSingleton<IReceivedNotificationDataRepository, ReceivedNotificationDataRepository>();
             services.AddSingleton<INotificationDataRepository, NotificationDataRepository>();
+            services.AddSingleton<ISendingNotificationDataRepository, SendingNotificationDataRepository>();
             services.AddSingleton<IExportDataRepository, ExportDataRepository>();
             services.AddSingleton<IAppConfigRepository, AppConfigRepository>();
 
@@ -179,6 +183,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator
             services.AddScoped<IGraphServiceClient, GraphServiceClient>();
             services.AddScoped<IGraphServiceFactory, GraphServiceFactory>();
             services.AddScoped<IGroupsService>(sp => sp.GetRequiredService<IGraphServiceFactory>().GetGroupsService());
+            services.AddScoped<IUsersService>(sp => sp.GetRequiredService<IGraphServiceFactory>().GetUsersService());
             services.AddScoped<IAppCatalogService>(sp => sp.GetRequiredService<IGraphServiceFactory>().GetAppCatalogService());
 
             // Add Application Insights telemetry.
@@ -190,6 +195,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator
             services.AddTransient<IAppSettingsService, AppSettingsService>();
             services.AddTransient<IUserDataService, UserDataService>();
             services.AddTransient<ITeamMembersService, TeamMembersService>();
+
+            services.AddHttpContextAccessor();
         }
 
         /// <summary>

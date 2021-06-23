@@ -5,10 +5,10 @@
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Repositories.Extensions
 {
-    using System;
-    using System.Threading.Tasks;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Models;
+    using System;
+    using System.Threading.Tasks;
 
     /// <summary>
     /// Extensions for the repository of the notification data.
@@ -40,6 +40,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Repositories.Extensions
                 Author = notification.Author,
                 ButtonTitle = notification.ButtonTitle,
                 ButtonLink = notification.ButtonLink,
+                ButtonTitle2 = notification.ButtonTitle2,
+                ButtonLink2 = notification.ButtonLink2,
                 CreatedBy = userName,
                 CreatedDate = DateTime.UtcNow,
                 IsDraft = true,
@@ -49,8 +51,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Repositories.Extensions
                 Rosters = notification.Rosters,
                 Groups = notification.Groups,
                 AllUsers = notification.AllUsers,
+                ListUsers = notification.ListUsers,
+                CsvUsers = notification.CsvUsers,
                 ScheduledDate = notification.ScheduledDate,
-                Buttons = notification.Buttons,
             };
 
             await notificationRepository.CreateOrUpdateAsync(notificationEntity);

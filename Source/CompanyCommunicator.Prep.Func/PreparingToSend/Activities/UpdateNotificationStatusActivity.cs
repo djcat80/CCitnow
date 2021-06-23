@@ -5,11 +5,11 @@
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
 {
-    using System;
-    using System.Threading.Tasks;
     using Microsoft.Azure.WebJobs;
     using Microsoft.Azure.WebJobs.Extensions.DurableTask;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
+    using System;
+    using System.Threading.Tasks;
 
     /// <summary>
     /// Update notification status activity.
@@ -34,7 +34,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         [FunctionName(FunctionNames.UpdateNotificationStatusActivity)]
         public async Task RunAsync(
-            [ActivityTrigger](string notificationId, NotificationStatus status) input)
+            [ActivityTrigger] (string notificationId, NotificationStatus status) input)
         {
             if (input.notificationId == null)
             {

@@ -5,14 +5,14 @@
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Localization
 {
-    using System.Collections.Generic;
-    using System.Globalization;
-    using System.Linq;
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Localization;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Resources;
+    using System.Collections.Generic;
+    using System.Globalization;
+    using System.Linq;
 
     /// <summary>
     /// Extension class for registering localization services in DI container.

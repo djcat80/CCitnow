@@ -7,7 +7,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories
 {
     using Microsoft.Extensions.Logging;
     using Microsoft.Extensions.Options;
-    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories;
 
     /// <summary>
     /// App configuration repository.

@@ -5,8 +5,6 @@
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
 {
-    using System;
-    using System.Threading.Tasks;
     using Microsoft.Azure.WebJobs;
     using Microsoft.Bot.Builder;
     using Microsoft.Bot.Builder.Teams;
@@ -22,6 +20,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.Teams;
     using Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services;
     using Newtonsoft.Json;
+    using System;
+    using System.Threading.Tasks;
 
     /// <summary>
     /// Azure Function App triggered by messages from a Service Bus queue
@@ -137,7 +137,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
                 }
 
                 // Send message.
-                var messageActivity = await this.GetMessageActivity(messageContent);
+                var messageActivity = await this.GetMessageActivity(messageContent, log);
 
                 // If the message is important, we need to notify the user in Teams
                 if (messageContent.IsImportant)
@@ -230,11 +230,16 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
             }
         }
 
-        private async Task<IMessageActivity> GetMessageActivity(SendQueueMessageContent message)
+        private async Task<IMessageActivity> GetMessageActivity(SendQueueMessageContent message, ILogger log)
         {
             var notification = await this.notificationRepo.GetAsync(
                 NotificationDataTableNames.SendingNotificationsPartition,
                 message.NotificationId);
+
+            log.LogInformation($"Message content: {notification.Content}");
+            notification.Content = notification.Content.Replace("[_AAID_]", message.RecipientData.RecipientId);
+            log.LogInformation($"Message content after replace: {notification.Content}");
+
 
             var adaptiveCardAttachment = new Attachment()
             {

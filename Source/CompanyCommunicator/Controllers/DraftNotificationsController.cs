@@ -5,11 +5,6 @@
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Security.Claims;
-    using System.Threading.Tasks;
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.Extensions.Localization;
@@ -22,6 +17,11 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
     using Microsoft.Teams.Apps.CompanyCommunicator.DraftNotificationPreview;
     using Microsoft.Teams.Apps.CompanyCommunicator.Models;
     using Microsoft.Teams.Apps.CompanyCommunicator.Repositories.Extensions;
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Security.Claims;
+    using System.Threading.Tasks;
 
     /// <summary>
     /// Controller for the draft notification data.
@@ -34,6 +34,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         private readonly ITeamDataRepository teamDataRepository;
         private readonly IDraftNotificationPreviewService draftNotificationPreviewService;
         private readonly IGroupsService groupsService;
+        private readonly IUsersService usersService;
         private readonly IAppSettingsService appSettingsService;
         private readonly IStringLocalizer<Strings> localizer;
 
@@ -46,19 +47,22 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         /// <param name="appSettingsService">App Settings service.</param>
         /// <param name="localizer">Localization service.</param>
         /// <param name="groupsService">group service.</param>
+        /// <param name="usersService">users service.</param>
         public DraftNotificationsController(
             INotificationDataRepository notificationDataRepository,
             ITeamDataRepository teamDataRepository,
             IDraftNotificationPreviewService draftNotificationPreviewService,
             IAppSettingsService appSettingsService,
             IStringLocalizer<Strings> localizer,
-            IGroupsService groupsService)
+            IGroupsService groupsService,
+            IUsersService usersService)
         {
             this.notificationDataRepository = notificationDataRepository ?? throw new ArgumentNullException(nameof(notificationDataRepository));
             this.teamDataRepository = teamDataRepository ?? throw new ArgumentNullException(nameof(teamDataRepository));
             this.draftNotificationPreviewService = draftNotificationPreviewService ?? throw new ArgumentNullException(nameof(draftNotificationPreviewService));
             this.localizer = localizer ?? throw new ArgumentNullException(nameof(localizer));
             this.groupsService = groupsService ?? throw new ArgumentNullException(nameof(groupsService));
+            this.usersService = usersService ?? throw new ArgumentNullException(nameof(usersService));
             this.appSettingsService = appSettingsService ?? throw new ArgumentNullException(nameof(appSettingsService));
         }
 
@@ -153,17 +157,20 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
                 Author = notification.Author,
                 ButtonTitle = notification.ButtonTitle,
                 ButtonLink = notification.ButtonLink,
+                ButtonTitle2 = notification.ButtonTitle2,
+                ButtonLink2 = notification.ButtonLink2,
                 CreatedBy = this.HttpContext.User?.Identity?.Name,
                 CreatedDate = DateTime.UtcNow,
                 IsDraft = true,
-                IsScheduled = notification.IsScheduled,
-                IsImportant = notification.IsImportant,
                 ScheduledDate = notification.ScheduledDate,
                 Teams = notification.Teams,
                 Rosters = notification.Rosters,
                 Groups = notification.Groups,
                 AllUsers = notification.AllUsers,
-                Buttons = notification.Buttons,
+                ListUsers = notification.ListUsers,
+                CsvUsers = notification.CsvUsers,
+                IsScheduled = notification.IsScheduled,
+                IsImportant = notification.IsImportant,
             };
 
             await this.notificationDataRepository.CreateOrUpdateAsync(notificationEntity);
@@ -278,6 +285,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
                 Author = notificationEntity.Author,
                 ButtonTitle = notificationEntity.ButtonTitle,
                 ButtonLink = notificationEntity.ButtonLink,
+                ButtonTitle2 = notificationEntity.ButtonTitle2,
+                ButtonLink2 = notificationEntity.ButtonLink2,
                 CreatedDateTime = notificationEntity.CreatedDate,
                 Teams = notificationEntity.Teams,
                 Rosters = notificationEntity.Rosters,
@@ -286,7 +295,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
                 IsScheduled = notificationEntity.IsScheduled,
                 IsImportant = notificationEntity.IsImportant,
                 ScheduledDate = notificationEntity.ScheduledDate,
-                Buttons = notificationEntity.Buttons,
+                ListUsers = notificationEntity.ListUsers,
+                CsvUsers = notificationEntity.CsvUsers,
             };
 
             return this.Ok(result);
@@ -319,6 +329,14 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
                 .Select(x => x.DisplayName).
                 ToListAsync();
 
+            var listNames = await this.usersService
+                .GetBatchByUserMails(notificationEntity.ListUsers);
+            var listUserNames = listNames.Select(x => x.DisplayName).ToList();
+
+            var csvNames = await this.usersService
+                .GetBatchByUserMails(notificationEntity.CsvUsers);
+            var csvUserNames = csvNames.Select(x => x.DisplayName).ToList();
+
             var result = new DraftNotificationSummaryForConsent
             {
                 NotificationId = notificationId,
@@ -326,6 +344,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
                 RosterNames = await this.teamDataRepository.GetTeamNamesByIdsAsync(notificationEntity.Rosters),
                 GroupNames = groupNames,
                 AllUsers = notificationEntity.AllUsers,
+                ListUsers = listUserNames,
+                CsvUsers = csvUserNames,
             };
 
             return this.Ok(result);

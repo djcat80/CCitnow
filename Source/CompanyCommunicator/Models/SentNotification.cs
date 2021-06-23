@@ -59,6 +59,16 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Models
         public bool AllUsers { get; set; }
 
         /// <summary>
+        /// Gets or sets Groups audience name collection.
+        /// </summary>
+        public IEnumerable<string> ListUsers { get; set; }
+
+        /// <summary>
+        /// Gets or sets Groups audience name collection.
+        /// </summary>
+        public IEnumerable<string> CsvUsers { get; set; }
+
+        /// <summary>
         /// Gets or sets error message.
         /// </summary>
         public string ErrorMessage { get; set; }
@@ -77,5 +87,15 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Models
         /// Gets or sets a value indicating whether sending is in progress.
         /// </summary>
         public bool SendingCompleted { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether the message is scheduled.
+        /// </summary>
+        public bool IsScheduled { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether the message is important.
+        /// </summary>
+        public bool IsImportant { get; set; }
     }
 }

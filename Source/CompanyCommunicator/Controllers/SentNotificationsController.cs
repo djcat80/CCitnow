@@ -5,13 +5,9 @@
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Security.Claims;
-    using System.Threading.Tasks;
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
+    using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.Logging;
     using Microsoft.Extensions.Options;
     using Microsoft.Graph;
@@ -27,6 +23,11 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGraph;
     using Microsoft.Teams.Apps.CompanyCommunicator.Controllers.Options;
     using Microsoft.Teams.Apps.CompanyCommunicator.Models;
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Security.Claims;
+    using System.Threading.Tasks;
 
     /// <summary>
     /// Controller for the sent notification data.
@@ -42,11 +43,13 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         private readonly IDataQueue dataQueue;
         private readonly double forceCompleteMessageDelayInSeconds;
         private readonly IGroupsService groupsService;
+        private readonly IUsersService usersService;
         private readonly IExportDataRepository exportDataRepository;
         private readonly IAppCatalogService appCatalogService;
         private readonly IAppSettingsService appSettingsService;
         private readonly UserAppOptions userAppOptions;
         private readonly ILogger<SentNotificationsController> logger;
+        private readonly IConfiguration configuration;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SentNotificationsController"/> class.
@@ -58,11 +61,13 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         /// <param name="dataQueue">The service bus queue for the data queue.</param>
         /// <param name="dataQueueMessageOptions">The options for the data queue messages.</param>
         /// <param name="groupsService">The groups service.</param>
+        /// <param name="usersService">The users service.</param>
         /// <param name="exportDataRepository">The Export data repository instance.</param>
         /// <param name="appCatalogService">App catalog service.</param>
         /// <param name="appSettingsService">App settings service.</param>
         /// <param name="userAppOptions">User app options.</param>
         /// <param name="loggerFactory">The logger factory.</param>
+        /// <param name="configuration">The configuration.</param>
         public SentNotificationsController(
             INotificationDataRepository notificationDataRepository,
             ISentNotificationDataRepository sentNotificationDataRepository,
@@ -71,11 +76,13 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
             IDataQueue dataQueue,
             IOptions<DataQueueMessageOptions> dataQueueMessageOptions,
             IGroupsService groupsService,
+            IUsersService usersService,
             IExportDataRepository exportDataRepository,
             IAppCatalogService appCatalogService,
             IAppSettingsService appSettingsService,
             IOptions<UserAppOptions> userAppOptions,
-            ILoggerFactory loggerFactory)
+            ILoggerFactory loggerFactory,
+            IConfiguration configuration)
         {
             if (dataQueueMessageOptions is null)
             {
@@ -89,11 +96,13 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
             this.dataQueue = dataQueue ?? throw new ArgumentNullException(nameof(dataQueue));
             this.forceCompleteMessageDelayInSeconds = dataQueueMessageOptions.Value.ForceCompleteMessageDelayInSeconds;
             this.groupsService = groupsService ?? throw new ArgumentNullException(nameof(groupsService));
+            this.usersService = usersService ?? throw new ArgumentNullException(nameof(usersService));
             this.exportDataRepository = exportDataRepository ?? throw new ArgumentNullException(nameof(exportDataRepository));
             this.appCatalogService = appCatalogService ?? throw new ArgumentNullException(nameof(appCatalogService));
             this.appSettingsService = appSettingsService ?? throw new ArgumentNullException(nameof(appSettingsService));
             this.userAppOptions = userAppOptions?.Value ?? throw new ArgumentNullException(nameof(userAppOptions));
             this.logger = loggerFactory?.CreateLogger<SentNotificationsController>() ?? throw new ArgumentNullException(nameof(loggerFactory));
+            this.configuration = configuration;
         }
 
         /// <summary>
@@ -118,8 +127,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
                 return this.NotFound($"Draft notification, Id: {draftNotification.Id}, could not be found.");
             }
 
+            string appUrl = this.configuration.GetSection("AzureAd").GetSection("ApplicationIdUri").Value.Replace("api://", "https://");
+
             var newSentNotificationId =
-                await this.notificationDataRepository.MoveDraftToSentPartitionAsync(draftNotificationDataEntity);
+                await this.notificationDataRepository.MoveDraftToSentPartitionAsync(draftNotificationDataEntity, appUrl);
 
             // Ensure the data table needed by the Azure Functions to send the notifications exist in Azure storage.
             await this.sentNotificationDataRepository.EnsureSentNotificationDataTableExistsAsync();
@@ -205,6 +216,18 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
                 Select(x => x.DisplayName).
                 ToListAsync();
 
+            var userListNames = await this.usersService.
+                GetListUsersAsync(notificationEntity.ListUsers.ToList());
+
+            var userNames = userListNames.Select(x => x.DisplayName).
+                ToList();
+
+            var csvListNames = await this.usersService.
+                GetListUsersAsync(notificationEntity.CsvUsers.ToList());
+
+            var csvNames = csvListNames.Select(x => x.DisplayName).
+                ToList();
+
             var userId = this.HttpContext.User.FindFirstValue(Common.Constants.ClaimTypeUserId);
             var userNotificationDownload = await this.exportDataRepository.GetAsync(userId, id);
 
@@ -217,7 +240,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
                 Author = notificationEntity.Author,
                 ButtonTitle = notificationEntity.ButtonTitle,
                 ButtonLink = notificationEntity.ButtonLink,
-                Buttons = notificationEntity.Buttons,
+                ButtonTitle2 = notificationEntity.ButtonTitle2,
+                ButtonLink2 = notificationEntity.ButtonLink2,
                 IsScheduled = notificationEntity.IsScheduled,
                 IsImportant = notificationEntity.IsImportant,
                 CreatedDateTime = notificationEntity.CreatedDate,
@@ -229,6 +253,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
                 RosterNames = await this.teamDataRepository.GetTeamNamesByIdsAsync(notificationEntity.Rosters),
                 GroupNames = groupNames,
                 AllUsers = notificationEntity.AllUsers,
+                ListUsers = userNames,
+                CsvUsers = csvNames,
                 SendingStartedDate = notificationEntity.SendingStartedDate,
                 ErrorMessage = notificationEntity.ErrorMessage,
                 WarningMessage = notificationEntity.WarningMessage,

@@ -5,8 +5,6 @@
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func
 {
-    using System;
-    using System.Threading.Tasks;
     using Microsoft.Azure.WebJobs;
     using Microsoft.Azure.WebJobs.Extensions.DurableTask;
     using Microsoft.Extensions.Localization;
@@ -16,9 +14,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Resources;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues.ExportQueue;
     using Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Model;
-    using Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Orchestrator;
     using Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend;
     using Newtonsoft.Json;
+    using System;
+    using System.Threading.Tasks;
 
     /// <summary>
     /// Azure Function App triggered by messages from a Service Bus queue.

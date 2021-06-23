@@ -5,8 +5,8 @@
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Models
 {
-    using System;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
+    using System;
 
     /// <summary>
     /// Sent notification summary model class.

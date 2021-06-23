@@ -5,14 +5,14 @@
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues
 {
+    using Microsoft.Azure.ServiceBus;
+    using Microsoft.Azure.ServiceBus.Core;
+    using Newtonsoft.Json;
     using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Text;
     using System.Threading.Tasks;
-    using Microsoft.Azure.ServiceBus;
-    using Microsoft.Azure.ServiceBus.Core;
-    using Newtonsoft.Json;
 
     /// <summary>
     /// Base Azure service bus queue service.

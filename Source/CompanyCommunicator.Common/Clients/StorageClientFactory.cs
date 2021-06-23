@@ -5,11 +5,11 @@
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Clients
 {
-    using System;
     using global::Azure.Core;
     using global::Azure.Storage.Blobs;
     using Microsoft.Extensions.Options;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories;
+    using System;
 
     /// <summary>
     /// Storage client factory.

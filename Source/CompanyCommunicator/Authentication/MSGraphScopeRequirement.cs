@@ -17,7 +17,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Authentication
         /// Initializes a new instance of the <see cref="MSGraphScopeRequirement"/> class.
         /// </summary>
         /// <param name="scopes">Microsoft Graph Scopes.</param>
-       public MSGraphScopeRequirement(string[] scopes)
+        public MSGraphScopeRequirement(string[] scopes)
         {
             this.Scopes = scopes;
         }
@@ -25,6 +25,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Authentication
         /// <summary>
         /// Gets microsoft Graph Scopes.
         /// </summary>
-       public string[] Scopes { get; private set; }
+        public string[] Scopes { get; private set; }
     }
 }

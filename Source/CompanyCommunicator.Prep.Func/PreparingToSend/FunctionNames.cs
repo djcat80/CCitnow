@@ -66,6 +66,11 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
         public const string GetRecipientsActivity = nameof(GetRecipientsActivity);
 
         /// <summary>
+        /// Sync list users activity function.
+        /// </summary>
+        public const string SyncListUsersActivity = nameof(SyncListUsersActivity);
+
+        /// <summary>
         /// Get pending recipients (ie recipients with no conversation id in the database) acitvity function.
         /// </summary>
         public const string GetPendingRecipientsActivity = nameof(GetPendingRecipientsActivity);

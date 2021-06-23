@@ -5,8 +5,8 @@
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotificationData
 {
-    using System;
     using Microsoft.Azure.Cosmos.Table;
+    using System;
 
     /// <summary>
     /// Sent notification entity class.
@@ -92,6 +92,18 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotif
         ///     If the recipient is a team, this should be the team Id.
         /// </summary>
         public string RecipientId { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating the name of recipient the notification was sent to
+        /// using the recipient type strings at the top of this class.
+        /// </summary>
+        public string RecipientName { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating the email of recipient the notification was sent to
+        /// using the recipient type strings at the top of this class.
+        /// </summary>
+        public string RecipientMail { get; set; }
 
         /// <summary>
         /// Gets or sets the total number of throttle responses the bot received when trying

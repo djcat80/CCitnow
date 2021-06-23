@@ -5,8 +5,8 @@
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
 {
-    using System;
     using Microsoft.Azure.WebJobs.Extensions.DurableTask;
+    using System;
 
     /// <summary>
     /// Function settings.

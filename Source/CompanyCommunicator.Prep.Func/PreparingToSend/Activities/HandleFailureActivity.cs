@@ -5,13 +5,13 @@
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
 {
-    using System;
-    using System.Threading.Tasks;
     using Microsoft.Azure.WebJobs;
     using Microsoft.Azure.WebJobs.Extensions.DurableTask;
     using Microsoft.Extensions.Localization;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Resources;
+    using System;
+    using System.Threading.Tasks;
 
     /// <summary>
     /// This class contains the "clean up" durable activity.
@@ -44,7 +44,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
         /// <returns>A task that represents the work queued to execute.</returns>
         [FunctionName(FunctionNames.HandleFailureActivity)]
         public async Task RunAsync(
-            [ActivityTrigger](NotificationDataEntity notification, Exception exception) input)
+            [ActivityTrigger] (NotificationDataEntity notification, Exception exception) input)
         {
             if (input.notification == null)
             {

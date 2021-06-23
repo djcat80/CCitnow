@@ -5,10 +5,6 @@
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
 {
-    using System;
-    using System.Linq;
-    using System.Threading;
-    using System.Threading.Tasks;
     using Microsoft.Bot.Builder;
     using Microsoft.Bot.Builder.Teams;
     using Microsoft.Bot.Schema;
@@ -17,6 +13,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Resources;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.User;
+    using System;
+    using System.Linq;
+    using System.Threading;
+    using System.Threading.Tasks;
 
     /// <summary>
     /// Company Communicator Author Bot.
@@ -47,6 +47,27 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
             this.teamsFileUpload = teamsFileUpload ?? throw new ArgumentNullException(nameof(teamsFileUpload));
             this.appSettingsService = appSettingsService ?? throw new ArgumentNullException(nameof(appSettingsService));
             this.localizer = localizer ?? throw new ArgumentNullException(nameof(localizer));
+        }
+
+        protected override async Task<MessagingExtensionActionResponse> OnTeamsMessagingExtensionSubmitActionAsync(ITurnContext<IInvokeActivity> turnContext, MessagingExtensionAction action, CancellationToken cancellationToken)
+        {
+            return await base.OnTeamsMessagingExtensionSubmitActionAsync(turnContext, action, cancellationToken);
+        }
+
+        protected override Task OnMessageActivityAsync(ITurnContext<IMessageActivity> turnContext, CancellationToken cancellationToken)
+        {
+            return base.OnMessageActivityAsync(turnContext, cancellationToken);
+        }
+
+        /// <inheritdoc/>
+        protected override async Task<InvokeResponse> OnInvokeActivityAsync(ITurnContext<IInvokeActivity> turnContext, CancellationToken cancellationToken)
+        {
+            return await base.OnInvokeActivityAsync(turnContext, cancellationToken);
+        }
+
+        protected override async Task<InvokeResponse> OnTeamsCardActionInvokeAsync(ITurnContext<IInvokeActivity> turnContext, CancellationToken cancellationToken)
+        {
+            return await base.OnInvokeActivityAsync(turnContext, cancellationToken);
         }
 
         /// <summary>

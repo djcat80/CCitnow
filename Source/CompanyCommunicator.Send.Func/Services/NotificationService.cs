@@ -5,13 +5,12 @@
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services
 {
-    using System;
-    using System.Net;
-    using System.Threading.Tasks;
-    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Extensions;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues.SendQueue;
+    using System;
+    using System.Net;
+    using System.Threading.Tasks;
 
     /// <summary>
     /// Notification Service.
@@ -20,18 +19,22 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services
     {
         private readonly IGlobalSendingNotificationDataRepository globalSendingNotificationDataRepository;
         private readonly ISentNotificationDataRepository sentNotificationDataRepository;
+        //private readonly IUsersService usersService;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="NotificationService"/> class.
         /// </summary>
         /// <param name="globalSendingNotificationDataRepository">The global sending notification data repository.</param>
         /// <param name="sentNotificationDataRepository">The sent notification data repository.</param>
+        /// <param name="usersService">UsersService.</param>
         public NotificationService(
             IGlobalSendingNotificationDataRepository globalSendingNotificationDataRepository,
-            ISentNotificationDataRepository sentNotificationDataRepository)
+            ISentNotificationDataRepository sentNotificationDataRepository/*,
+            IUsersService usersService*/)
         {
             this.globalSendingNotificationDataRepository = globalSendingNotificationDataRepository ?? throw new ArgumentNullException(nameof(globalSendingNotificationDataRepository));
             this.sentNotificationDataRepository = sentNotificationDataRepository ?? throw new ArgumentNullException(nameof(sentNotificationDataRepository));
+            //this.usersService = usersService ?? throw new ArgumentNullException(nameof(usersService));
         }
 
         /// <inheritdoc/>
@@ -110,6 +113,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services
             notification.ErrorMessage = errorMessage;
             notification.NumberOfFunctionAttemptsToSend = notification.NumberOfFunctionAttemptsToSend + 1;
             notification.AllSendStatusCodes = $"{notification.AllSendStatusCodes ?? string.Empty}{allSendStatusCodes}";
+            //Graph.User user = await this.usersService.GetUserAsync(recipientId);
 
             if (statusCode == (int)HttpStatusCode.Created)
             {
@@ -131,6 +135,12 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services
             {
                 notification.DeliveryStatus = SentNotificationDataEntity.Failed;
             }
+
+            /*if (user != null)
+            {
+                notification.RecipientMail = user.UserPrincipalName ?? string.Empty;
+                notification.RecipientName = user.DisplayName ?? string.Empty;
+            }*/
 
             await this.sentNotificationDataRepository.InsertOrMergeAsync(notification);
         }

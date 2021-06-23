@@ -5,11 +5,11 @@
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Mappers
 {
-    using System;
     using CsvHelper.Configuration;
     using Microsoft.Extensions.Localization;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Resources;
     using Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Model;
+    using System;
 
     /// <summary>
     /// Mapper class for UserData.

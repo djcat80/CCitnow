@@ -5,10 +5,6 @@
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Activities
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Threading;
-    using System.Threading.Tasks;
     using Microsoft.Azure.WebJobs;
     using Microsoft.Azure.WebJobs.Extensions.DurableTask;
     using Microsoft.Bot.Builder;
@@ -25,6 +21,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Activities
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.Teams;
     using Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend;
     using Polly;
+    using System;
+    using System.Collections.Generic;
+    using System.Threading;
+    using System.Threading.Tasks;
 
     /// <summary>
     /// Sends the file card.
@@ -75,7 +75,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Activities
         /// <returns>file card response id.</returns>
         [FunctionName(FunctionNames.SendFileCardActivity)]
         public async Task<string> SendFileCardActivityAsync(
-            [ActivityTrigger](string userId, string notificationId, string fileName) sendData,
+            [ActivityTrigger] (string userId, string notificationId, string fileName) sendData,
             ILogger log)
         {
             var user = await this.userDataRepository.GetAsync(UserDataTableNames.AuthorDataPartition, sendData.userId);

@@ -5,8 +5,8 @@
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Extensions
 {
-    using System;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues.SendQueue;
+    using System;
 
     /// <summary>
     /// Extension class for <see cref="SendQueueMessageContent"/>.

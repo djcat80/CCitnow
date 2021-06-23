@@ -5,9 +5,9 @@
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.Teams
 {
-    using System.Threading.Tasks;
     using Microsoft.Bot.Schema;
     using Microsoft.Extensions.Logging;
+    using System.Threading.Tasks;
 
     /// <summary>
     /// Teams message service.

@@ -5,8 +5,8 @@
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.User
 {
-    using System.Threading.Tasks;
     using Microsoft.Bot.Schema;
+    using System.Threading.Tasks;
 
     /// <summary>
     /// User Data Service.

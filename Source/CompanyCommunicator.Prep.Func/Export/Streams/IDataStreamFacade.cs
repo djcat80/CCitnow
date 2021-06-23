@@ -5,8 +5,8 @@
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Streams
 {
-    using System.Collections.Generic;
     using Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Model;
+    using System.Collections.Generic;
 
     /// <summary>
     /// Facade to get the data stream.

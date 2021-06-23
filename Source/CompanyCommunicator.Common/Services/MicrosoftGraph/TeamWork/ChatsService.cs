@@ -5,9 +5,9 @@
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGraph
 {
+    using Microsoft.Graph;
     using System;
     using System.Threading.Tasks;
-    using Microsoft.Graph;
 
     /// <summary>
     /// Chats Service.

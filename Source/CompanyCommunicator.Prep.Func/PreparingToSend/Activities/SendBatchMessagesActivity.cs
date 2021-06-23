@@ -5,10 +5,6 @@
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Threading.Tasks;
     using Microsoft.Azure.WebJobs;
     using Microsoft.Azure.WebJobs.Extensions.DurableTask;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
@@ -16,6 +12,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.TeamData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.UserData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues.SendQueue;
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Threading.Tasks;
 
     /// <summary>
     /// Sends batch messages to Send Queue.
@@ -41,7 +41,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         [FunctionName(FunctionNames.SendBatchMessagesActivity)]
         public async Task RunAsync(
-            [ActivityTrigger](NotificationDataEntity notification, List<SentNotificationDataEntity> batch) input)
+            [ActivityTrigger] (NotificationDataEntity notification, List<SentNotificationDataEntity> batch) input)
         {
             if (input.notification == null)
             {
@@ -86,6 +86,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
                         ConversationId = recipient.ConversationId,
                         ServiceUrl = recipient.ServiceUrl,
                         TenantId = recipient.TenantId,
+                        Name = recipient.RecipientName,
+                        Email = recipient.RecipientMail,
                     },
                 };
             }

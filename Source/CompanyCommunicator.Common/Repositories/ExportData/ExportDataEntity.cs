@@ -5,8 +5,8 @@
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.ExportData
 {
-    using System;
     using Microsoft.Azure.Cosmos.Table;
+    using System;
 
     /// <summary>
     /// Export notification entity class.

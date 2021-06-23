@@ -5,11 +5,11 @@
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData
 {
-    using System;
-    using System.Collections.Generic;
     using Microsoft.Azure.Cosmos.Table;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Extensions;
     using Newtonsoft.Json;
+    using System;
+    using System.Collections.Generic;
 
     /// <summary>
     /// Notification data entity class.
@@ -87,9 +87,14 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
         public bool IsImportant { get; set; }
 
         /// <summary>
-        /// Gets or sets a value with the JSON describing the buttons for the adaptive card.
+        /// Gets or sets the button title of the notification's content.
         /// </summary>
-        public string Buttons { get; set; }
+        public string ButtonTitle2 { get; set; }
+
+        /// <summary>
+        /// Gets or sets the button link of the notification's content.
+        /// </summary>
+        public string ButtonLink2 { get; set; }
 
         /// <summary>
         /// Gets or sets the TeamsInString value.
@@ -152,6 +157,44 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
         /// known users - this is equivalent to all of the users stored in the User Data table.
         /// </summary>
         public bool AllUsers { get; set; }
+
+        /// <summary>
+        /// Gets or sets the GroupsInsString value.
+        /// This property helps to save the Grousp list in the Azure Table storage.
+        /// Table storage doesn't support an array type of the property directly
+        /// so this is a comma separated list of the group ids for which the members
+        /// are the recipients.
+        /// </summary>
+        public string ListUsersInString { get; set; }
+
+        /// <summary>
+        /// Gets or sets the team ids of the Groups audience collection.
+        /// </summary>
+        [IgnoreProperty]
+        public IEnumerable<string> ListUsers
+        {
+            get => JsonConvert.DeserializeObject<IEnumerable<string>>(this.ListUsersInString.IsNullOrEmpty() ? "[]" : this.ListUsersInString);
+            set => this.ListUsersInString = JsonConvert.SerializeObject(value);
+        }
+
+        /// <summary>
+        /// Gets or sets the GroupsInsString value.
+        /// This property helps to save the Grousp list in the Azure Table storage.
+        /// Table storage doesn't support an array type of the property directly
+        /// so this is a comma separated list of the group ids for which the members
+        /// are the recipients.
+        /// </summary>
+        public string CsvUsersInString { get; set; }
+
+        /// <summary>
+        /// Gets or sets the team ids of the Groups audience collection.
+        /// </summary>
+        [IgnoreProperty]
+        public IEnumerable<string> CsvUsers
+        {
+            get => JsonConvert.DeserializeObject<IEnumerable<string>>(this.CsvUsersInString.IsNullOrEmpty() ? "[]" : this.CsvUsersInString);
+            set => this.CsvUsersInString = JsonConvert.SerializeObject(value);
+        }
 
         /// <summary>
         /// Gets or sets the message version number.

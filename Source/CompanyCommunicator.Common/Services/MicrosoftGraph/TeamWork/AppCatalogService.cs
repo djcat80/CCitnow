@@ -5,11 +5,10 @@
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGraph
 {
+    using Microsoft.Graph;
     using System;
     using System.Linq;
     using System.Threading.Tasks;
-
-    using Microsoft.Graph;
 
     /// <summary>
     /// Read information about the apps published in the Teams app store and organization's app catalog.

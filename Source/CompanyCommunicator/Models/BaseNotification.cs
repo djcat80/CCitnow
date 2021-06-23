@@ -48,19 +48,14 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Models
         public string ButtonLink { get; set; }
 
         /// <summary>
-        /// Gets or sets the Buttons value.
+        /// Gets or sets the Button Title value.
         /// </summary>
-        public string Buttons { get; set; }
+        public string ButtonTitle2 { get; set; }
 
         /// <summary>
-        /// Gets or sets a value indicating whether gets or sets the IsScheduled value.
+        /// Gets or sets the Button Link value.
         /// </summary>
-        public bool IsScheduled { get; set; }
-
-        /// <summary>
-        /// Gets or sets a value indicating whether gets or sets the IsImportant value.
-        /// </summary>
-        public bool IsImportant { get; set; }
+        public string ButtonLink2 { get; set; }
 
         /// <summary>
         /// Gets or sets the Created DateTime value.

@@ -5,14 +5,14 @@
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGraph
 {
+    using Microsoft.Graph;
+    using Newtonsoft.Json.Linq;
     using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Net.Http;
     using System.Text;
     using System.Threading.Tasks;
-    using Microsoft.Graph;
-    using Newtonsoft.Json.Linq;
 
     /// <summary>
     /// Users service.
@@ -100,6 +100,74 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGrap
         }
 
         /// <inheritdoc/>
+        public async Task<IEnumerable<User>> GetBatchByUserMails(IEnumerable<string> userMails)
+        {
+            if (userMails == null)
+            {
+                throw new ArgumentNullException(nameof(userMails));
+            }
+
+            var users = new List<User>();
+            var batches = this.GetBatchRequestMails(userMails);
+            foreach (var batchRequestContent in batches)
+            {
+                var response = await this.graphServiceClient
+                    .Batch
+                    .Request()
+                    .WithMaxRetry(GraphConstants.MaxRetry)
+                    .Header(Common.Constants.PermissionTypeKey, GraphPermissionType.Application.ToString())
+                    .PostAsync(batchRequestContent);
+
+                Dictionary<string, HttpResponseMessage> responses = await response.GetResponsesAsync();
+
+                foreach (string key in responses.Keys)
+                {
+                    HttpResponseMessage httpResponse = default;
+                    try
+                    {
+                        httpResponse = await response.GetResponseByIdAsync(key);
+                        if (httpResponse == null)
+                        {
+                            throw new ArgumentNullException(nameof(httpResponse));
+                        }
+
+                        httpResponse.EnsureSuccessStatusCode();
+                        var responseContent = await httpResponse.Content.ReadAsStringAsync();
+                        JObject content = JObject.Parse(responseContent);
+                        var userstemp = content["value"]
+                            .Children()
+                            .OfType<JObject>()
+                            .Select(obj => obj.ToObject<User>());
+                        if (userstemp == null)
+                        {
+                            continue;
+                        }
+
+                        users.AddRange(userstemp);
+                    }
+                    catch (HttpRequestException httpRequestException)
+                    {
+                        var error = new Error
+                        {
+                            Code = httpResponse.StatusCode.ToString(),
+                            Message = httpResponse.ReasonPhrase,
+                        };
+                        throw new ServiceException(error, httpResponse.Headers, httpResponse.StatusCode, httpRequestException.InnerException);
+                    }
+                    finally
+                    {
+                        if (httpResponse != null)
+                        {
+                            httpResponse.Dispose();
+                        }
+                    }
+                }
+            }
+
+            return users;
+        }
+
+        /// <inheritdoc/>
         public async IAsyncEnumerable<IEnumerable<User>> GetUsersAsync(string filter = null)
         {
             var graphResult = await this.graphServiceClient
@@ -125,17 +193,27 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGrap
         /// <inheritdoc/>
         public async Task<User> GetUserAsync(string userId)
         {
-            var graphResult = await this.graphServiceClient
-                    .Users[userId]
-                    .Request()
-                    .Select(user => new
-                    {
-                        user.Id,
-                        user.DisplayName,
-                        user.UserPrincipalName,
-                    })
-                    .WithMaxRetry(GraphConstants.MaxRetry)
-                    .GetAsync();
+            User graphResult;
+            try
+            {
+                graphResult = await this.graphServiceClient
+                        .Users[userId]
+                        .Request()
+                        .Select(user => new
+                        {
+                            user.Id,
+                            user.DisplayName,
+                            user.UserPrincipalName,
+                        })
+                        .WithMaxRetry(GraphConstants.MaxRetry)
+                        .Header(Common.Constants.PermissionTypeKey, GraphPermissionType.Application.ToString())
+                        .GetAsync();
+            }
+            catch (Exception ex)
+            {
+                return null;
+            }
+
             return graphResult;
         }
 
@@ -218,6 +296,33 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGrap
             return false;
         }
 
+        /// <inheritdoc/>
+        public async Task<IEnumerable<User>> GetListUsersAsync(List<string> listUsers)
+        {
+            var response = await this.graphServiceClient
+                .Users
+                .Request()
+                .Select(user => new
+                {
+                    user.Id,
+                    user.DisplayName,
+                    user.UserPrincipalName,
+                })
+                .Filter(this.GetUserMailFilter(listUsers))
+                .Top(GraphConstants.MaxPageSize)
+                .WithMaxRetry(GraphConstants.MaxRetry)
+                .GetAsync();
+
+            var users = response.OfType<User>().ToList();
+            while (response.NextPageRequest != null)
+            {
+                response = await response.NextPageRequest.GetAsync();
+                users?.AddRange(response.OfType<User>() ?? new List<User>());
+            }
+
+            return users;
+        }
+
         private string GetUserIdFilter(IEnumerable<string> userIds)
         {
             StringBuilder filterUserIds = new StringBuilder();
@@ -232,6 +337,25 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGrap
             }
 
             return filterUserIds.ToString();
+        }
+
+        private string GetUserMailFilter(IEnumerable<string> userMails)
+        {
+            StringBuilder filterUserMails = new StringBuilder();
+            foreach (var mail in userMails)
+            {
+                if (!string.IsNullOrEmpty(mail.ToString()))
+                {
+                    if (!string.IsNullOrEmpty(filterUserMails.ToString()))
+                    {
+                        filterUserMails.Append(" or ");
+                    }
+
+                    filterUserMails.Append($"mail eq '{mail}'");
+                }
+            }
+
+            return filterUserMails.ToString();
         }
 
         private IEnumerable<BatchRequestContent> GetBatchRequest(IEnumerable<IEnumerable<string>> userIdsByGroups)
@@ -256,6 +380,39 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGrap
 
                 var filterUserIds = this.GetUserIdFilter(userIds);
                 var httpRequestMessage = new HttpRequestMessage(HttpMethod.Get, $"https://graph.microsoft.com/v1.0/users?$filter={filterUserIds}&$select=id,displayName,userPrincipalName");
+                batchRequestContent.AddBatchRequestStep(new BatchRequestStep(requestId.ToString(), httpRequestMessage));
+
+                if (batchRequestContent.BatchRequestSteps.Count() % maxNoBatchItems == 0)
+                {
+                    batches.Add(batchRequestContent);
+                    batchRequestContent = new BatchRequestContent();
+                }
+
+                requestId++;
+            }
+
+            if (batchRequestContent.BatchRequestSteps.Count > 0 && batchRequestContent.BatchRequestSteps.Count < maxNoBatchItems)
+            {
+                batches.Add(batchRequestContent);
+            }
+
+            return batches;
+        }
+
+        private IEnumerable<BatchRequestContent> GetBatchRequestMails(IEnumerable<string> userMails)
+        {
+            var batches = new List<BatchRequestContent>();
+            int maxNoBatchItems = 20;
+
+            var batchRequestContent = new BatchRequestContent();
+            int requestId = 1;
+
+            for (int i = 0; i < userMails.Count(); i += 15)
+            {
+                var userMailsBatch = userMails.Skip(i).Take(15);
+
+                var filterUserMails = this.GetUserMailFilter(userMailsBatch);
+                var httpRequestMessage = new HttpRequestMessage(HttpMethod.Get, $"https://graph.microsoft.com/v1.0/users?$filter={filterUserMails}&$select=id,displayName,userPrincipalName");
                 batchRequestContent.AddBatchRequestStep(new BatchRequestStep(requestId.ToString(), httpRequestMessage));
 
                 if (batchRequestContent.BatchRequestSteps.Count() % maxNoBatchItems == 0)

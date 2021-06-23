@@ -5,14 +5,14 @@
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Threading.Tasks;
     using Microsoft.Azure.WebJobs;
     using Microsoft.Azure.WebJobs.Extensions.DurableTask;
     using Microsoft.Extensions.Logging;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Threading.Tasks;
 
     /// <summary>
     /// Syncs target set of recipients to Sent notification table.
@@ -82,6 +82,26 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
 
                 // Fan-Out Fan-In
                 await Task.WhenAll(tasks);
+                return;
+            }
+
+            // List of users
+            if (notification.ListUsers.Any())
+            {
+                await context.CallActivityWithRetryAsync(
+                    FunctionNames.SyncListUsersActivity,
+                    FunctionSettings.DefaultRetryOptions,
+                    (notification.Id, notification.ListUsers));
+                return;
+            }
+
+            // Csv of users
+            if (notification.CsvUsers.Any())
+            {
+                await context.CallActivityWithRetryAsync(
+                    FunctionNames.SyncListUsersActivity,
+                    FunctionSettings.DefaultRetryOptions,
+                    (notification.Id, notification.CsvUsers));
                 return;
             }
 

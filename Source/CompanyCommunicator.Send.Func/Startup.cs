@@ -8,8 +8,6 @@
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
 {
-    using System;
-    using System.Globalization;
     using Microsoft.Azure.Functions.Extensions.DependencyInjection;
     using Microsoft.Bot.Builder.Integration.AspNet.Core;
     using Microsoft.Bot.Connector.Authentication;
@@ -21,8 +19,11 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.CommonBot;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues.SendQueue;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGraph;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.Teams;
     using Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services;
+    using System;
+    using System.Globalization;
 
     /// <summary>
     /// Register services in DI container of the Azure functions system.
@@ -95,6 +96,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
 
             // Add the Notification service.
             builder.Services.AddTransient<INotificationService, NotificationService>();
+            builder.Services.AddScoped<IUsersService>(sp => sp.GetRequiredService<IGraphServiceFactory>().GetUsersService());
         }
     }
 }

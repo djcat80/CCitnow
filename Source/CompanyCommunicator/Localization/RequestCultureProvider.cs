@@ -5,16 +5,16 @@
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Localization
 {
-    using System;
-    using System.IO;
-    using System.Linq;
-    using System.Text;
-    using System.Threading.Tasks;
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Localization;
     using Microsoft.Bot.Schema;
     using Newtonsoft.Json;
     using Newtonsoft.Json.Linq;
+    using System;
+    using System.IO;
+    using System.Linq;
+    using System.Text;
+    using System.Threading.Tasks;
 
     /// <summary>
     /// The CompanyCommunicatorCultureProvider implements the interface <see cref="IRequestCultureProvider"/>.

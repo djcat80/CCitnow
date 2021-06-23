@@ -5,12 +5,12 @@
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Threading.Tasks;
     using Microsoft.Azure.Cosmos.Table;
     using Microsoft.Extensions.Logging;
     using Microsoft.Extensions.Options;
+    using System;
+    using System.Collections.Generic;
+    using System.Threading.Tasks;
 
     /// <summary>
     /// Repository of the notification data in the table storage.
@@ -86,7 +86,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
         }
 
         /// <inheritdoc/>
-        public async Task<string> MoveDraftToSentPartitionAsync(NotificationDataEntity draftNotificationEntity)
+        public async Task<string> MoveDraftToSentPartitionAsync(NotificationDataEntity draftNotificationEntity, string appUrl)
         {
             try
             {
@@ -108,8 +108,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
                     Summary = draftNotificationEntity.Summary,
                     Author = draftNotificationEntity.Author,
                     ButtonTitle = draftNotificationEntity.ButtonTitle,
-                    ButtonLink = draftNotificationEntity.ButtonLink,
-                    Buttons = draftNotificationEntity.Buttons,
+                    ButtonLink = this.UpdateLinksForRedirect(draftNotificationEntity.ButtonLink, newSentNotificationId, appUrl, "1"),
+                    ButtonTitle2 = draftNotificationEntity.ButtonTitle2,
+                    ButtonLink2 = this.UpdateLinksForRedirect(draftNotificationEntity.ButtonLink2, newSentNotificationId, appUrl, "2"),
                     CreatedBy = draftNotificationEntity.CreatedBy,
                     CreatedDate = draftNotificationEntity.CreatedDate,
                     SentDate = null,
@@ -121,6 +122,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
                     Rosters = draftNotificationEntity.Rosters,
                     Groups = draftNotificationEntity.Groups,
                     AllUsers = draftNotificationEntity.AllUsers,
+                    ListUsers = draftNotificationEntity.ListUsers,
+                    CsvUsers = draftNotificationEntity.CsvUsers,
                     MessageVersion = draftNotificationEntity.MessageVersion,
                     Succeeded = 0,
                     Failed = 0,
@@ -163,8 +166,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
                     Summary = notificationEntity.Summary,
                     Author = notificationEntity.Author,
                     ButtonTitle = notificationEntity.ButtonTitle,
-                    ButtonLink = notificationEntity.ButtonLink,
-                    Buttons = notificationEntity.Buttons,
+                    ButtonLink = this.ExtractLinksForRedirect(notificationEntity.ButtonLink),
+                    ButtonTitle2 = notificationEntity.ButtonTitle2,
+                    ButtonLink2 = this.ExtractLinksForRedirect(notificationEntity.ButtonLink2),
                     IsImportant = notificationEntity.IsImportant,
                     CreatedBy = createdBy,
                     CreatedDate = DateTime.UtcNow,
@@ -173,6 +177,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
                     Groups = notificationEntity.Groups,
                     Rosters = notificationEntity.Rosters,
                     AllUsers = notificationEntity.AllUsers,
+                    ListUsers = notificationEntity.ListUsers,
+                    CsvUsers = notificationEntity.CsvUsers,
                 };
 
                 await this.CreateOrUpdateAsync(newNotificationEntity);
@@ -248,6 +254,33 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
             return string.IsNullOrWhiteSpace(originalString)
                 ? newString
                 : $"{originalString}{Environment.NewLine}{newString}";
+        }
+
+        private string UpdateLinksForRedirect(string buttonUrl, string notificationID, string appUrl, string buttonID)
+        {
+            if (string.IsNullOrEmpty(buttonUrl))
+            {
+                return string.Empty;
+            }
+            else
+            {
+                return appUrl + "/api/Redirect?userID=[_AAID_]&notificationID=" + notificationID + "&redirectUrl=" + buttonUrl + "&buttonID=" + buttonID;
+            }
+        }
+
+        private string ExtractLinksForRedirect(string fullUrl)
+        {
+            string ret = string.Empty;
+            try
+            {
+                ret = fullUrl.Split("&redirectUrl=")[1].Split("&buttonID=")[0];
+            }
+            catch
+            {
+                ret = fullUrl;
+            }
+
+            return ret;
         }
     }
 }

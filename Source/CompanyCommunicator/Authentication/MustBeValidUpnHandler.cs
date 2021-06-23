@@ -5,13 +5,13 @@
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Authentication
 {
+    using Microsoft.AspNetCore.Authorization;
+    using Microsoft.Extensions.Options;
     using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Security.Claims;
     using System.Threading.Tasks;
-    using Microsoft.AspNetCore.Authorization;
-    using Microsoft.Extensions.Options;
 
     /// <summary>
     /// This class is an authorization handler, which handles the authorization requirement.

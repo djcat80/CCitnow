@@ -5,12 +5,12 @@
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGraph
 {
+    using Microsoft.Graph;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Extensions;
     using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
-    using Microsoft.Graph;
-    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Extensions;
 
     /// <summary>
     /// Groups Service.

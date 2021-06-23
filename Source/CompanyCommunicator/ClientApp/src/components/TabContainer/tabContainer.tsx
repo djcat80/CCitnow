@@ -100,7 +100,7 @@ class TabContainer extends React.Component<ITaskInfoProps, ITabContainerState> {
                 </Flex>
                 <Flex className="messageContainer">
                     <Flex.Item grow={1} >
-                        <Accordion defaultActiveIndex={[0, 1, 2]} panels={panels} />
+                        <Accordion defaultActiveIndex={[0, 1]} panels={panels} />
                     </Flex.Item>
                 </Flex>
             </Flex>

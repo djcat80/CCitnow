@@ -5,14 +5,14 @@
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
 {
-    using System;
-    using System.Threading.Tasks;
     using Microsoft.Azure.WebJobs;
     using Microsoft.Azure.WebJobs.Extensions.DurableTask;
     using Microsoft.Extensions.Logging;
     using Microsoft.Extensions.Options;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues.DataQueue;
+    using System;
+    using System.Threading.Tasks;
 
     /// <summary>
     /// Data aggregation trigger activity.
@@ -53,7 +53,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         [FunctionName(FunctionNames.DataAggregationTriggerActivity)]
         public async Task RunAsync(
-            [ActivityTrigger](string notificationId, int recipientCount) input,
+            [ActivityTrigger] (string notificationId, int recipientCount) input,
             ILogger log)
         {
             if (input.notificationId == null)

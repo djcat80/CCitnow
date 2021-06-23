@@ -5,9 +5,6 @@
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator
 {
-    using System;
-    using System.Threading;
-    using System.Threading.Tasks;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Hosting;
     using Microsoft.Extensions.Logging;
@@ -15,6 +12,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues.DataQueue;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues.PrepareToSendQueue;
+    using System;
+    using System.Threading;
+    using System.Threading.Tasks;
 
     /// <summary>
     /// Register background timed service to send scheduled messages.
@@ -114,8 +114,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator
             }
             else
             {
-                var newSentNotificationId =
-                    await this.notificationDataRepository.MoveDraftToSentPartitionAsync(draftNotificationDataEntity);
+                // Get AppURL
+                string appUrl = MyAppData.configuration.GetSection("AzureAd").GetSection("ApplicationIdUri").Value.Replace("api://", "https://");
+                var newSentNotificationId = await this.notificationDataRepository.MoveDraftToSentPartitionAsync(draftNotificationDataEntity, appUrl);
 
                 // Ensure the data table needed by the Azure Functions to send the notifications exist in Azure storage.
                 await this.sentNotificationDataRepository.EnsureSentNotificationDataTableExistsAsync();
