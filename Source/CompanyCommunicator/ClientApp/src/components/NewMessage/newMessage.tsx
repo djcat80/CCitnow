@@ -463,14 +463,28 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
                                             fluid
                                         />
 
-                                        <Input fluid className="inputField"
-                                            value={this.state.imageLink}
-                                            label={this.localize("ImageURL")}
-                                            placeholder={this.localize("ImageURL")}
-                                            onChange={this.onImageLinkChanged}
-                                            error={!(this.state.errorImageUrlMessage === "")}
-                                            autoComplete="off"
-                                        />
+                                        <Flex gap="gap.smaller" vAlign="end" className="inputField">
+                                            <Input
+                                                value={this.state.imageLink}
+                                                label={this.localize("ImageURL")}
+                                                placeholder={this.localize("ImageURLPlaceHolder")}
+                                                onChange={this.onImageLinkChanged}
+                                                error={!(this.state.errorImageUrlMessage === "")}
+                                                autoComplete="off"
+                                                fluid
+                                            />
+                                            <input type="file" accept="image/"
+                                                style={{ display: 'none' }}
+                                                onChange={this.handleImageSelection}
+                                                ref={this.fileInput} />
+                                            <Flex.Item push>
+                                                <Button circular onClick={this.handleUploadClick}
+                                                    size="small"
+                                                    icon={<FilesUploadIcon />}
+                                                    title={this.localize("UploadImage")}
+                                                />
+                                            </Flex.Item>
+                                        </Flex>
                                         <Text className={(this.state.errorImageUrlMessage === "") ? "hide" : "show"} error size="small" content={this.state.errorImageUrlMessage} />
 
                                         <div className="textArea">
